@@ -233,6 +233,32 @@ export const dictionary: Indicator[] = [
     lastUpdated: "2026-09-07",
     status: "active",
   },
+  {
+    id: "dolar",
+    slug: "dolar",
+    name: "Cotización del dólar",
+    shortName: "Dólar",
+    question: "¿A cuánto está el dólar?",
+    description:
+      "Cotización del dólar estadounidense billete en el mercado interbancario, según el Banco Central del Uruguay.",
+    plainDefinition:
+      "Cuántos pesos uruguayos vale un dólar según la cotización oficial que publica el Banco Central. Es la referencia del mercado mayorista: en bancos y casas de cambio el precio de compra y el de venta son distintos y no coinciden exactamente con este.",
+    category: "economia",
+    unit: "pesos",
+    unitLabel: "pesos uruguayos por dólar",
+    sourceId: "bcu",
+    sourceUrl: "https://www.bcu.gub.uy/Estadisticas-e-Indicadores/Paginas/Cotizaciones.aspx",
+    periodicity: "diaria",
+    geographicLevel: ["pais"],
+    availableFrom: "2000",
+    methodology:
+      "Dólar estadounidense billete del mercado interbancario (código 2225 del servicio de cotizaciones del BCU), valor vendedor. El último dato es la cotización del último día hábil disponible cuando el sitio se actualiza, una vez por mes; la variación se mide contra el cierre del mes anterior. Los promedios mensuales y anuales los calcula realidad.uy con todas las cotizaciones diarias del período.",
+    isCalculated: false,
+    reading: "neutral",
+    decimals: 3,
+    lastUpdated: "2026-10-12",
+    status: "active",
+  },
   // ── Sociedad ───────────────────────────────────────────────
   {
     id: "pobreza-personas",

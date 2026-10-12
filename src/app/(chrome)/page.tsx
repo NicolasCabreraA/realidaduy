@@ -9,12 +9,12 @@ import { getElectionResults, getParty } from "@/data/elections";
 const HOY = [
   "tasa-desempleo",
   "inflacion-interanual",
+  "dolar",
   "pobreza-personas",
   "pib-variacion",
   "poblacion",
   "salario-minimo",
   "indice-medio-salarios",
-  "pib-per-capita",
 ];
 
 export default function Home() {

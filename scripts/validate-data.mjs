@@ -18,6 +18,7 @@ const { municipioObservations } = await import("../src/data/observations/municip
 const { worldBankSeries } = await import("../src/data/observations/series-banco-mundial.ts");
 const { prismaObservations } = await import("../src/data/observations/prisma.ts");
 const { bcuPibObservations } = await import("../src/data/observations/bcu-pib.ts");
+const { bcuCotizacionesObservations } = await import("../src/data/observations/bcu-cotizaciones.ts");
 const { sources } = await import("../src/data/sources.ts");
 const { parties, elections, electionResults } = await import("../src/data/elections.ts");
 
@@ -34,6 +35,7 @@ const observations = [
   ...worldBankSeries,
   ...prismaObservations,
   ...bcuPibObservations,
+  ...bcuCotizacionesObservations,
 ];
 
 // Población municipal: cobertura razonable (interior + los 8 de Montevideo) y

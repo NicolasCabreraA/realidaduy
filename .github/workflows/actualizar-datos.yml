@@ -4,8 +4,9 @@
 #
 # Qué actualiza: los indicadores mensuales del INE (IPC, ECH e IMS, leídos de
 # sus informes técnicos), series del Banco Mundial, el PBI anual que publica
-# PRISMA (ANII), el PIB trimestral del BCU, tasas de seguridad (M. Interior) y
-# resultados electorales (Corte Electoral; con asserts contra el escrutinio).
+# PRISMA (ANII), el PIB trimestral y la cotización del dólar del BCU, tasas de
+# seguridad (M. Interior) y resultados electorales (Corte Electoral; con asserts
+# contra el escrutinio).
 # Lo que no tiene script (pobreza, salario mínimo, datos departamentales) lo
 # revisa la tarea local de Claude (día 5).
 
@@ -58,6 +59,12 @@ jobs:
         continue-on-error: true
         run: node scripts/ingest/fetch-bcu-pib.mjs
 
+      # Dólar: servicio web de cotizaciones del BCU. Mismo criterio: si falla,
+      # queda el archivo anterior y la corrida sigue.
+      - name: Ingesta BCU (cotización del dólar)
+        continue-on-error: true
+        run: node scripts/ingest/fetch-bcu-cotizaciones.mjs
+
       # El CSV de delitos pesa unos 160 MB y el servidor a veces corta la
       # descarga (pasó el 05/10/2026). Mismo criterio que PRISMA y el BCU: si
       # falla, la corrida sigue con el archivo anterior y no frena el IPC.
@@ -78,7 +85,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add src/data/observations/ine-mensual.ts src/data/observations/series-banco-mundial.ts src/data/observations/prisma.ts src/data/observations/bcu-pib.ts src/data/observations/seguridad.ts src/data/elecciones-generadas.ts
+          git add src/data/observations/ine-mensual.ts src/data/observations/series-banco-mundial.ts src/data/observations/prisma.ts src/data/observations/bcu-pib.ts src/data/observations/bcu-cotizaciones.ts src/data/observations/seguridad.ts src/data/elecciones-generadas.ts
           if git diff --cached --quiet; then
             echo "Sin cambios de datos este mes."
           else

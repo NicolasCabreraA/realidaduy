@@ -19,6 +19,7 @@ export type DataStatus =
   | "UNAVAILABLE";
 
 export type Periodicity =
+  | "diaria"
   | "mensual"
   | "trimestral"
   | "semestral"
