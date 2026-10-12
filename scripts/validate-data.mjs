@@ -19,6 +19,7 @@ const { worldBankSeries } = await import("../src/data/observations/series-banco-
 const { prismaObservations } = await import("../src/data/observations/prisma.ts");
 const { bcuPibObservations } = await import("../src/data/observations/bcu-pib.ts");
 const { bcuCotizacionesObservations } = await import("../src/data/observations/bcu-cotizaciones.ts");
+const { ineAnualesObservations } = await import("../src/data/observations/ine-anuales.ts");
 const { sources } = await import("../src/data/sources.ts");
 const { parties, elections, electionResults } = await import("../src/data/elections.ts");
 
@@ -36,6 +37,7 @@ const observations = [
   ...prismaObservations,
   ...bcuPibObservations,
   ...bcuCotizacionesObservations,
+  ...ineAnualesObservations,
 ];
 
 // Población municipal: cobertura razonable (interior + los 8 de Montevideo) y
@@ -130,6 +132,7 @@ if (montevideo && Math.abs(sumaMunicipios - montevideo) / montevideo > 0.01)
 const deptWide = [
   ...departmentEchObservations,
   ...otuObservations,
+  ...ineAnualesObservations,
   ...otuCensalObservations,
   ...ineMensualObservations,
   ...seguridadObservations,
@@ -145,7 +148,7 @@ for (const [indicatorId, period] of [
   ["ingreso-medio-hogar", "2023"],
   ["pobreza-personas", "2023"],
   ["pobreza-personas", "2024"],
-  ["esperanza-vida", "2019"],
+  ["esperanza-vida", "2022"],
   ["homicidios-100k", "2025"],
   ["rapinas-100k", "2025"],
   ["hurtos-100k", "2025"],

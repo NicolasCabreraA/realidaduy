@@ -16,9 +16,10 @@
     "fetch:prisma": "node scripts/ingest/fetch-prisma.mjs",
     "fetch:bcu": "node scripts/ingest/fetch-bcu-pib.mjs",
     "fetch:cotizaciones": "node scripts/ingest/fetch-bcu-cotizaciones.mjs",
+    "fetch:ine-anuales": "node scripts/ingest/fetch-ine-anuales.mjs",
     "fetch:seguridad": "node scripts/ingest/fetch-seguridad.mjs",
     "fetch:elecciones": "node scripts/ingest/fetch-elecciones.mjs",
-    "fetch:mensual": "npm run fetch:ine && npm run fetch:worldbank && npm run fetch:prisma && npm run fetch:bcu && npm run fetch:cotizaciones && npm run fetch:seguridad && npm run fetch:elecciones"
+    "fetch:mensual": "npm run fetch:ine && npm run fetch:ine-anuales && npm run fetch:worldbank && npm run fetch:prisma && npm run fetch:bcu && npm run fetch:cotizaciones && npm run fetch:seguridad && npm run fetch:elecciones"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.3.3",

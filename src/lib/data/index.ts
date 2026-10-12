@@ -16,6 +16,7 @@ import { worldBankSeries } from "@/data/observations/series-banco-mundial";
 import { prismaObservations } from "@/data/observations/prisma";
 import { bcuPibObservations } from "@/data/observations/bcu-pib";
 import { bcuCotizacionesObservations } from "@/data/observations/bcu-cotizaciones";
+import { ineAnualesObservations } from "@/data/observations/ine-anuales";
 import { departments, getTerritoryById } from "@/data/territories";
 
 export { dictionary, getIndicator };
@@ -37,6 +38,7 @@ const allObservations: Observation[] = [
   ...prismaObservations,
   ...bcuPibObservations,
   ...bcuCotizacionesObservations,
+  ...ineAnualesObservations,
 ];
 
 /** Todas las observaciones de la plataforma (usado por las descargas CSV). */

@@ -63,4 +63,34 @@ export const nationalObservations: Observation[] = [
     notes:
       "Metodología nueva del INE (canasta de la ENGIH 2016-2017, adoptada en 2025): no comparable con la serie de la metodología anterior. Hogares: 13,2%; indigencia: 1,7% de las personas. Informe técnico del INE publicado el 20/04/2026.",
   },
+  // Estimaciones semestrales: el titular compara cada semestre con el mismo
+  // semestre del año anterior (misma granularidad), nunca con el año completo.
+  {
+    indicatorId: "pobreza-personas",
+    territoryId: "UY",
+    period: "2025-S1",
+    periodLabel: "1er semestre 2025",
+    value: 17.7,
+    status: "OFFICIAL",
+    demo: false,
+    sourceUrl:
+      "https://www.gub.uy/instituto-nacional-estadistica/comunicacion/publicaciones/estimacion-pobreza-metodo-del-ingreso-primer-semestre-2025",
+    retrievedAt: "2026-10-12",
+    notes:
+      "Metodología 2017 del INE. Hogares: 13,9%; indigencia: 1,8% de las personas. Informe técnico del INE publicado el 01/10/2025.",
+  },
+  {
+    indicatorId: "pobreza-personas",
+    territoryId: "UY",
+    period: "2026-S1",
+    periodLabel: "1er semestre 2026",
+    value: 14.8,
+    status: "OFFICIAL",
+    demo: false,
+    sourceUrl:
+      "https://www.gub.uy/instituto-nacional-estadistica/comunicacion/publicaciones/estimacion-pobreza-metodo-del-ingreso-primer-semestre-2026",
+    retrievedAt: "2026-10-12",
+    notes:
+      "Metodología 2017 del INE. Margen de error al 95%: ±1,0 punto. Hogares: 11,6%; indigencia: 1,2% de las personas. Es una estimación semestral: se compara con el primer semestre de 2025, no con el año completo. Informe técnico del INE publicado el 07/10/2026.",
+  },
 ];
