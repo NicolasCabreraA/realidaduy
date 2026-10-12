@@ -14,8 +14,8 @@ fuente, período y metodología a la vista.
   sin configuración extra). Cada push a `main` redeploya solo.
 - **Datos:** el workflow [`actualizar-datos.yml`](.github/workflows/actualizar-datos.yml)
   corre el día 5 de cada mes: ingesta INE (IPC, ECH e IMS, desde los informes
-  técnicos) + Banco Mundial + PBI anual de PRISMA (ANII) + PIB trimestral del BCU +
-  seguridad (M. Interior) + elecciones (Corte Electoral, con verificación automática contra
+  técnicos; esperanza de vida y desempleo por departamento) + Banco Mundial + PBI anual de PRISMA (ANII) + PIB trimestral y cotización del
+  dólar del BCU + seguridad (M. Interior) + elecciones (Corte Electoral, con verificación automática contra
   el escrutinio), valida, compila y commitea — lo que dispara el redeploy. También se puede
   lanzar a mano desde la pestaña Actions ("Run workflow").
 - **Lo que no tiene script** (pobreza, salario mínimo, datos departamentales): lo revisa la
@@ -28,7 +28,7 @@ npm run dev            # servidor de desarrollo
 npm run build          # build de producción (41 páginas estáticas)
 npm run start          # servir el build
 npm run fetch:geo      # ingesta de geometrías (IDE + cartografía censal INE)
-npm run fetch:mensual  # ingesta mensual: INE, Banco Mundial, PRISMA, BCU, seguridad y elecciones
+npm run fetch:mensual  # ingesta mensual: INE, Banco Mundial, PRISMA, BCU (PIB y dólar), seguridad y elecciones
 npm run validate:data  # validación de datos (integridad, sumas, outliers)
 ```
 
@@ -58,7 +58,11 @@ está publicado como artifact del proyecto.
 
 - Indicadores: INE, BCU, MTSS, Corte Electoral (ver `/fuentes` en la app). El PIB trimestral
   sale de la planilla del BCU; el script trae los certificados intermedios que el servidor del
-  BCU no manda (`scripts/ingest/certs/`).
+  BCU no manda (`scripts/ingest/certs/`). El dólar sale del servicio web público de
+  cotizaciones del BCU (dólar billete interbancario, desde 2000); el script verifica el último
+  dato contra la página de cotizaciones. La planilla de mortalidad del INE está en
+  www5.ine.gub.uy, que manda un intermedio equivocado: el script usa el correcto
+  (`scripts/ingest/certs/ine-intermedios.pem`).
 - Series históricas comparables: Banco Mundial (fuente secundaria, siempre etiquetada).
 - PBI anual oficial (BCU, a precios constantes de 2016), en el gráfico de evolución del PIB:
   hasta 2016 vía [PRISMA](https://prisma.uy), el portal de indicadores de la ANII (datos

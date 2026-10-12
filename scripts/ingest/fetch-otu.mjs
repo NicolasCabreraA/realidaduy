@@ -7,15 +7,14 @@
 // ('Hombres'/'Mujeres'/'Total') y data-datocsv (valor crudo); (b) tabla-etiqueta
 // con data-row sin celdas seguida de la tabla de valores sin data-row.
 //
-// Ingiere:
-//  1. Pobreza en personas, Metodología 2017 (la NUEVA) — año 2024, por depto.
-//     Chequeo duro: el total país debe ser ~17,3% (cifra oficial conocida).
-//  2. Esperanza de vida al nacer por sexo — 2019, por depto (indicador nuevo).
-//  3. Tasa de desempleo ECH — promedio anual 2024, por depto. Chequeo duro:
-//     el total país debe ser ~8,2% (cifra oficial del INE). Esta serie
-//     REEMPLAZÓ a la de MIDES (tabla 7976): la auditoría cruzada del
-//     2026-08-26 mostró que el total de MIDES (8,9%) y su apertura
-//     departamental no cuadran con el INE, mientras que la del OTU sí.
+// Ingiere la pobreza en personas, Metodología 2017 (la NUEVA) — año 2024, por
+// depto. Chequeo duro: el total país debe ser ~17,3% (cifra oficial conocida).
+//
+// La esperanza de vida y el desempleo por departamento salían de acá (2019 y
+// 2024); desde el 12/10/2026 salen del INE, con fetch-ine-anuales.mjs: la
+// esperanza de vida tiene datos más nuevos (Revisión 2025) y el desempleo, la
+// cifra del Anuario, que difiere en una décima en Artigas y Tacuarembó.
+// Ojo: el OTU responde 403 a pedidos desde algunas redes en la nube.
 //
 // Salida: src/data/observations/otu.ts
 // Uso: node scripts/ingest/fetch-otu.mjs
@@ -151,49 +150,11 @@ if (Math.abs(paisPobreza - 17.3) > 0.15) {
 }
 console.log(`  ✓ total país 2024 (Met. 2017): ${paisPobreza}% (cifra oficial conocida: 17,3%)`);
 
-// ── 2. Esperanza de vida al nacer por sexo — 2019 ───────────────────────────
-console.log("Esperanza de vida al nacer por departamento, 2019…");
-const ESPERANZA_URL = otuUrl(3053, "2019-01-01");
-const esperanzaHtml = await cachedFetch("otu-esperanza-2019.html", ESPERANZA_URL);
-const esperanza = splitTerritories(parseOtuTables(esperanzaHtml), "esperanza de vida");
-for (const [iso, cells] of Object.entries(esperanza.depts)) {
-  if (!(cells.Total > 70 && cells.Total < 85)) {
-    throw new Error(`Esperanza de vida fuera de rango en ${iso}: ${cells.Total}`);
-  }
-}
-console.log(`  ✓ total país 2019: ${fmt(esperanza.pais.Total)} años`);
-
-// ── 3. Tasa de desempleo ECH — promedio anual 2024 ──────────────────────────
-console.log("Tasa de desempleo por departamento, 2024…");
-const DESEMPLEO_URL = otuUrl(3770, "2024-01-01");
-const desempleoHtml = await cachedFetch("otu-desempleo-2024.html", DESEMPLEO_URL);
-const desempleoOtu = splitTerritories(parseOtuTables(desempleoHtml), "desempleo ECH");
-const paisDesempleo = round1(desempleoOtu.pais.Total);
-if (Math.abs(paisDesempleo - 8.2) > 0.2) {
-  throw new Error(
-    `CHEQUEO FALLIDO — total país de desempleo 2024: esperado ~8,2 (INE), obtenido ${paisDesempleo}`
-  );
-}
-console.log(`  ✓ total país 2024: ${paisDesempleo}% (cifra oficial del INE: ~8,2%)`);
-
 // ── Salida ───────────────────────────────────────────────────────────────────
 const lines = [];
 for (const [iso, cells] of Object.entries(pobreza.depts).sort()) {
   lines.push(
     `  { indicatorId: "pobreza-personas", territoryId: ${JSON.stringify(iso)}, period: "2024", periodLabel: "2024 · metodología nueva", value: ${round1(cells.Total)}, status: "OFFICIAL", demo: false, breakBefore: true, sourceUrl: ${JSON.stringify(POBREZA_URL)}, retrievedAt: ${JSON.stringify(TODAY)}, notes: "Metodología 2017 (la nueva canasta del INE): comparable con la serie nacional vigente, NO con el dato departamental 2023 (metodología anterior). Hombres: ${fmt(cells.Hombres)}% · Mujeres: ${fmt(cells.Mujeres)}%. Elaboración Observatorio Territorio Uruguay (OPP) sobre la ECH del INE." },`
-  );
-}
-for (const [iso, cells] of Object.entries(esperanza.depts).sort()) {
-  lines.push(
-    `  { indicatorId: "esperanza-vida", territoryId: ${JSON.stringify(iso)}, period: "2019", periodLabel: "2019", value: ${round1(cells.Total)}, status: "OFFICIAL", demo: false, sourceUrl: ${JSON.stringify(ESPERANZA_URL)}, retrievedAt: ${JSON.stringify(TODAY)}, notes: "Hombres: ${fmt(cells.Hombres)} años · Mujeres: ${fmt(cells.Mujeres)} años. Elaboración Observatorio Territorio Uruguay (OPP)." },`
-  );
-}
-lines.push(
-  `  { indicatorId: "esperanza-vida", territoryId: "UY", period: "2019", periodLabel: "2019", value: ${round1(esperanza.pais.Total)}, status: "OFFICIAL", demo: false, sourceUrl: ${JSON.stringify(ESPERANZA_URL)}, retrievedAt: ${JSON.stringify(TODAY)}, notes: "Hombres: ${fmt(esperanza.pais.Hombres)} años · Mujeres: ${fmt(esperanza.pais.Mujeres)} años. Elaboración Observatorio Territorio Uruguay (OPP)." },`
-);
-for (const [iso, cells] of Object.entries(desempleoOtu.depts).sort()) {
-  lines.push(
-    `  { indicatorId: "tasa-desempleo", territoryId: ${JSON.stringify(iso)}, period: "2024", periodLabel: "2024 (promedio anual)", value: ${round1(cells.Total)}, status: "OFFICIAL", demo: false, sourceUrl: ${JSON.stringify(DESEMPLEO_URL)}, retrievedAt: ${JSON.stringify(TODAY)}, notes: "Promedio anual 2024, elaboración Observatorio Territorio Uruguay (OPP) sobre la ECH del INE; su total país (${fmt(paisDesempleo)}%) coincide con la cifra oficial. Hombres: ${fmt(cells.Hombres)}% · Mujeres: ${fmt(cells.Mujeres)}%." },`
   );
 }
 

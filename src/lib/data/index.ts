@@ -15,6 +15,8 @@ import { seguridadObservations } from "@/data/observations/seguridad";
 import { worldBankSeries } from "@/data/observations/series-banco-mundial";
 import { prismaObservations } from "@/data/observations/prisma";
 import { bcuPibObservations } from "@/data/observations/bcu-pib";
+import { bcuCotizacionesObservations } from "@/data/observations/bcu-cotizaciones";
+import { ineAnualesObservations } from "@/data/observations/ine-anuales";
 import { departments, getTerritoryById } from "@/data/territories";
 
 export { dictionary, getIndicator };
@@ -35,6 +37,8 @@ const allObservations: Observation[] = [
   ...worldBankSeries,
   ...prismaObservations,
   ...bcuPibObservations,
+  ...bcuCotizacionesObservations,
+  ...ineAnualesObservations,
 ];
 
 /** Todas las observaciones de la plataforma (usado por las descargas CSV). */
@@ -135,6 +139,69 @@ export function getDepartmentRanking(indicatorId: string): RankingEntry[] {
 /** Indicadores activos que declaran datos para un nivel territorial. */
 export function indicatorsForLevel(level: Territory["level"]): Indicator[] {
   return dictionary.filter((i) => i.status === "active" && i.geographicLevel.includes(level));
+}
+
+export type PeriodKind = "mensual" | "trimestral" | "semestral" | "anual";
+
+const PERIOD_KIND: [PeriodKind, RegExp][] = [
+  ["mensual", /^\d{4}-(0[1-9]|1[0-2])$/],
+  ["trimestral", /^\d{4}-Q[1-4]$/],
+  ["semestral", /^\d{4}-S[12]$/],
+  ["anual", /^\d{4}$/],
+];
+
+/** Granularidad de un período ("2026-S1" → semestral); undefined si es diario. */
+export function periodKind(period: string): PeriodKind | undefined {
+  return PERIOD_KIND.find(([, re]) => re.test(period))?.[0];
+}
+
+export interface ComparablePeriod {
+  period: string;
+  label: string;
+  value: number;
+  /** Nombre corto del organismo de este dato. */
+  source: string;
+  breakBefore: boolean;
+  notes?: string;
+}
+
+/**
+ * Series para comparar dos períodos de la misma granularidad (mes contra mes,
+ * semestre contra semestre…). Cada granularidad usa una sola jerarquía de
+ * fuente: la oficial si tiene al menos dos períodos y, solo en la anual, la
+ * secundaria (Banco Mundial) si no hay oficial. Nunca mezcla las dos. Solo
+ * devuelve las granularidades con dos períodos o más.
+ */
+export function getComparableSeries(
+  indicatorId: string,
+  territoryId: string,
+  sourceName: (o: Observation) => string
+): { kind: PeriodKind; periods: ComparablePeriod[] }[] {
+  const obs = getObservations(indicatorId, territoryId).filter((o) => o.value !== null);
+  const out: { kind: PeriodKind; periods: ComparablePeriod[] }[] = [];
+  for (const [kind] of PERIOD_KIND) {
+    const ofKind = obs.filter((o) => periodKind(o.period) === kind);
+    const official = ofKind.filter((o) => o.status !== "SECONDARY");
+    const chosen =
+      official.length >= 2
+        ? official
+        : kind === "anual"
+          ? ofKind.filter((o) => o.status === "SECONDARY")
+          : [];
+    if (chosen.length < 2) continue;
+    out.push({
+      kind,
+      periods: chosen.map((o) => ({
+        period: o.period,
+        label: o.periodLabel,
+        value: o.value!,
+        source: sourceName(o),
+        breakBefore: Boolean(o.breakBefore),
+        notes: o.notes,
+      })),
+    });
+  }
+  return out;
 }
 
 /** ¿Tiene el indicador al menos una observación en este territorio? */
