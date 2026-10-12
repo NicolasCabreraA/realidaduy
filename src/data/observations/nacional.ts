@@ -42,11 +42,11 @@ export const nationalObservations: Observation[] = [
     periodLabel: "Desde julio 2026",
     value: 25383,
     status: "OFFICIAL",
-    demo: true,
-    sourceUrl:
-      "https://www.infobae.com/america/agencias/2026/07/01/el-salario-minimo-en-uruguay-aumenta-un-33-y-ronda-los-630-dolares/",
-    retrievedAt: "2026-08-25",
-    notes: "Ajuste de +3,3% desde el 1º de julio de 2026. Valor nominal.",
+    demo: false,
+    sourceUrl: "https://www.impo.com.uy/bases/decretos/319-2025",
+    retrievedAt: "2026-10-12",
+    notes:
+      "Decreto 319/025, artículo 2: ajuste de +3,3% desde el 1º de julio de 2026. Valor nominal (a precios corrientes).",
   },
   // ── Sociedad ───────────────────────────────────────────────
   {
@@ -56,11 +56,11 @@ export const nationalObservations: Observation[] = [
     periodLabel: "Año 2025",
     value: 16.6,
     status: "OFFICIAL",
-    demo: true,
+    demo: false,
     sourceUrl:
-      "https://www.ambito.com/uruguay/la-pobreza-al-166-2025-pero-se-concentro-mas-fuerza-ninos-y-hogares-encabezados-mujeres-n6268800",
-    retrievedAt: "2026-08-25",
+      "https://www.gub.uy/instituto-nacional-estadistica/comunicacion/publicaciones/estimacion-pobreza-metodo-del-ingreso-ano-2025",
+    retrievedAt: "2026-10-12",
     notes:
-      "Metodología nueva del INE (canasta de la ENGIH 2016-2017, adoptada en 2025): no comparable con la serie de la metodología anterior. Equivale a 578.665 personas; hogares: 13,2%; indigencia: 1,7%. El informe del 1er semestre 2026 aún no estaba publicado al 26/08/2026.",
+      "Metodología nueva del INE (canasta de la ENGIH 2016-2017, adoptada en 2025): no comparable con la serie de la metodología anterior. Hogares: 13,2%; indigencia: 1,7% de las personas. Informe técnico del INE publicado el 20/04/2026.",
   },
 ];

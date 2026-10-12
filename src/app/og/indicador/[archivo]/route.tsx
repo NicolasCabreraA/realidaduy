@@ -1,5 +1,5 @@
 import { activeIndicators, getIndicator } from "@/data/dictionary";
-import { getSource } from "@/data/sources";
+import { getObservationSource, getSource } from "@/data/sources";
 import { getDepartmentRanking, getLatest } from "@/lib/data";
 import { formatValue } from "@/lib/format";
 import { renderOgImage } from "@/lib/og";
@@ -21,10 +21,13 @@ export async function GET(_req: Request, { params }: { params: Promise<{ archivo
   const indicator = getIndicator(archivo.replace(/\.png$/, ""));
   if (!indicator) return new Response("No encontrado", { status: 404 });
 
-  const source = getSource(indicator.sourceId);
   const latest = getLatest(indicator.id, "UY");
   const hasValue = Boolean(latest && latest.obs.value !== null);
-  const deptCount = hasValue ? 0 : getDepartmentRanking(indicator.id).length;
+  const ranking = hasValue ? [] : getDepartmentRanking(indicator.id);
+  const deptCount = ranking.length;
+  // La fuente del dato que muestra la imagen: el nacional o, si no hay, el del ranking.
+  const shown = hasValue ? latest?.obs : ranking[0]?.obs;
+  const source = shown ? getObservationSource(indicator.sourceId, shown) : getSource(indicator.sourceId);
 
   return renderOgImage({
     eyebrow: "Indicador",

@@ -52,6 +52,15 @@ export const sources: Source[] = [
     provides: "Indicadores territoriales por departamento y municipio.",
   },
   {
+    id: "mides",
+    name: "Ministerio de Desarrollo Social — Observatorio Social",
+    shortName: "MIDES",
+    url: "https://www.gub.uy/ministerio-desarrollo-social/",
+    type: "official",
+    provides:
+      "Ingreso medio de los hogares y pobreza por departamento (elaboraciones sobre la ECH del INE).",
+  },
+  {
     id: "prisma",
     name: "PRISMA — Portal de indicadores de ciencia, tecnología e innovación (ANII)",
     shortName: "PRISMA (ANII)",
@@ -75,26 +84,32 @@ export function getSource(id: string): Source | undefined {
   return sources.find((s) => s.id === id);
 }
 
-// Hosts de datos que no pertenecen al organismo del indicador: la serie
-// histórica del Banco Mundial vive dentro de indicadores del INE, y no se le
-// puede atribuir al INE. El PBI anual que publica PRISMA es del BCU, pero la
-// condición de uso es citar el portal.
-const FOREIGN_HOSTS: Array<[RegExp, string]> = [
-  [/(^|\.)worldbank\.org$/i, "banco-mundial"],
-  [/(^|\.)bancomundial\.org$/i, "banco-mundial"],
-  [/(^|\.)prisma\.uy$/i, "prisma"],
+// Datos que no pertenecen al organismo del indicador, reconocidos por su URL
+// (host + ruta). La serie histórica del Banco Mundial vive dentro de
+// indicadores del INE, y no se le puede atribuir al INE. El PBI anual que
+// publica PRISMA es del BCU, pero la condición de uso es citar el portal. El
+// desempleo y la pobreza por departamento son elaboraciones del Observatorio
+// Territorio Uruguay (OPP) y el ingreso de los hogares, del MIDES: todos sobre
+// la ECH, pero el número publicado es de ellos. En gub.uy todos los
+// organismos comparten host, por eso se compara también la ruta.
+const SOURCE_BY_URL: Array<[RegExp, string]> = [
+  [/^([^/]+\.)?worldbank\.org\//i, "banco-mundial"],
+  [/^([^/]+\.)?bancomundial\.org\//i, "banco-mundial"],
+  [/^([^/]+\.)?prisma\.uy\//i, "prisma"],
+  [/^otu\.opp\.gub\.uy\//i, "opp"],
+  [/^www\.gub\.uy\/ministerio-desarrollo-social\//i, "mides"],
 ];
 
-/** Fuente a citar para una observación: la del host de su URL si es una de
- * FOREIGN_HOSTS, si no la del indicador. */
+/** Fuente a citar para una observación: la de su URL si coincide con
+ * SOURCE_BY_URL, si no la del indicador. */
 export function getObservationSource(
   indicatorSourceId: string | undefined,
   obs: Observation
 ): Source | undefined {
   try {
-    const host = new URL(obs.sourceUrl).hostname;
-    const foreign = FOREIGN_HOSTS.find(([re]) => re.test(host));
-    if (foreign) return getSource(foreign[1]);
+    const url = new URL(obs.sourceUrl);
+    const match = SOURCE_BY_URL.find(([re]) => re.test(url.hostname + url.pathname));
+    if (match) return getSource(match[1]);
   } catch {
     // sourceUrl mal formada: se cae al organismo del indicador.
   }

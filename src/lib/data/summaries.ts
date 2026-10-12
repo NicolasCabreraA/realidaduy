@@ -3,7 +3,7 @@
 import { departments, montevideoMunicipalities, municipalTerritories } from "@/data/territories";
 import { getGovernment, getParty } from "@/data/elections";
 import { getLatest, indicatorsForLevel } from "@/lib/data";
-import { getSource } from "@/data/sources";
+import { getObservationSource } from "@/data/sources";
 import { formatNumber, formatValue } from "@/lib/format";
 import type { Category, GeoLevel } from "@/lib/types";
 
@@ -59,7 +59,7 @@ function metricsFor(territoryId: string, level: GeoLevel): MetricSummary[] {
       value: latest.obs.value,
       display: formatValue(latest.obs.value, i.unit, i.decimals),
       periodLabel: latest.obs.periodLabel,
-      sourceShort: getSource(i.sourceId)?.shortName ?? i.sourceId,
+      sourceShort: getObservationSource(i.sourceId, latest.obs)?.shortName ?? i.sourceId,
     });
   }
   return out;
