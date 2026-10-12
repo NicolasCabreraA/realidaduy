@@ -2,7 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { activeIndicators, getIndicator } from "@/data/dictionary";
-import { getDepartmentRanking, getHistorySeries, getLatest } from "@/lib/data";
+import {
+  getComparableSeries,
+  getDepartmentRanking,
+  getHistorySeries,
+  getLatest,
+  periodKind,
+} from "@/lib/data";
 import { getObservationSource, getSource } from "@/data/sources";
 import { formatNumber, formatValue } from "@/lib/format";
 import { downloadForIndicator } from "@/lib/downloads";
@@ -13,6 +19,7 @@ import Delta from "@/components/charts/Delta";
 import ChartCard from "@/components/charts/ChartCard";
 import LineChart from "@/components/charts/LineChart";
 import RankingList from "@/components/charts/RankingList";
+import PeriodCompare from "@/components/charts/PeriodCompare";
 import SourceNote from "@/components/ui/SourceNote";
 import StateView from "@/components/ui/StateView";
 
@@ -81,6 +88,15 @@ export default async function IndicadorPage({
     ? getDepartmentRanking(indicator.id)
     : [];
   const csv = downloadForIndicator(indicator.slug);
+  // Dos períodos de la misma granularidad, elegidos por el lector (país).
+  const comparable = getComparableSeries(
+    indicator.id,
+    "UY",
+    (o) => getObservationSource(indicator.sourceId, o)?.shortName ?? ""
+  );
+  const PLURAL = { mensual: "meses", trimestral: "trimestres", semestral: "semestres", anual: "años" };
+  const kinds = comparable.map((c) => PLURAL[c.kind]);
+  const kindsText = kinds.length > 1 ? `${kinds.slice(0, -1).join(", ")} o ${kinds[kinds.length - 1]}` : kinds[0];
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 md:px-6 md:py-10">
@@ -223,6 +239,25 @@ export default async function IndicadorPage({
           </p>
         )}
       </section>
+
+      {/* Comparar dos períodos */}
+      {comparable.length > 0 ? (
+        <section aria-labelledby="comparar-periodos" className="mt-8">
+          <h2 id="comparar-periodos" className="font-display text-2xl font-bold">
+            Compará dos períodos
+          </h2>
+          <p className="mt-1 text-sm text-ink-faint">
+            Elegí dos {kindsText} del país y mirá cuánto cambió.
+          </p>
+          <div className="mt-4">
+            <PeriodCompare
+              indicator={indicator}
+              series={comparable}
+              defaultKind={latest ? periodKind(latest.obs.period) : undefined}
+            />
+          </div>
+        </section>
+      ) : null}
 
       {/* Por departamento */}
       <section aria-labelledby="por-departamento" className="mt-8">
