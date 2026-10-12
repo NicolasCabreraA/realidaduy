@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getIndicator } from "@/data/dictionary";
 import { getHistorySeries, getLatest } from "@/lib/data";
-import { getSource } from "@/data/sources";
+import { getObservationSource } from "@/data/sources";
 import Delta from "@/components/charts/Delta";
 import StateView from "@/components/ui/StateView";
 import MetricValue from "@/components/charts/MetricValue";
@@ -24,7 +24,6 @@ export default function MetricCard({
   const indicator = getIndicator(indicatorId);
   if (!indicator) return null;
   const latest = getLatest(indicatorId, territoryId);
-  const source = getSource(indicator.sourceId);
   const target = href ?? `/indicadores/${indicator.slug}`;
   // Serie anual para el mini-gráfico decorativo: la misma del gráfico de
   // evolución (oficial si la hay, si no Banco Mundial).
@@ -46,6 +45,7 @@ export default function MetricCard({
   }
 
   const { obs, delta, prev } = latest;
+  const source = getObservationSource(indicator.sourceId, obs);
   return (
     <Link
       href={target}

@@ -1,5 +1,5 @@
 import type { Indicator, Observation } from "@/lib/types";
-import { getSource } from "@/data/sources";
+import { getObservationSource, getSource } from "@/data/sources";
 import { StatusBadge } from "@/components/ui/Badge";
 
 /** "¿De dónde sale este dato?" — provenance completo, expandible sin JS. */
@@ -10,7 +10,7 @@ export default function SourceNote({
   indicator: Indicator;
   obs?: Observation;
 }) {
-  const source = getSource(indicator.sourceId);
+  const source = obs ? getObservationSource(indicator.sourceId, obs) : getSource(indicator.sourceId);
   return (
     <details className="fold rounded-2xl border border-line bg-surface px-4 py-3">
       <summary className="text-sm font-semibold text-primary">

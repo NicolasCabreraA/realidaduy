@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import EmbedFrame from "@/components/embed/EmbedFrame";
 import RankingList from "@/components/charts/RankingList";
 import { activeIndicators, getIndicator } from "@/data/dictionary";
-import { getSource } from "@/data/sources";
+import { getObservationSource } from "@/data/sources";
 import { getDepartmentRanking } from "@/lib/data";
 import { formatValue } from "@/lib/format";
 
@@ -36,7 +36,7 @@ export default async function EmbedRankingPage({
   const ranking = getDepartmentRanking(indicator.id);
   if (ranking.length < 2) notFound();
 
-  const source = getSource(indicator.sourceId);
+  const source = getObservationSource(indicator.sourceId, ranking[0].obs);
   const period = ranking[0].obs.periodLabel;
 
   return (

@@ -152,7 +152,7 @@ export default async function IndicadorPage({
             <p className="mt-1 text-sm text-ink-soft">{indicator.unitLabel}</p>
             <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-ink-faint">
               <span>
-                {latest.obs.periodLabel} · {source?.shortName}
+                {latest.obs.periodLabel} · {getObservationSource(indicator.sourceId, latest.obs)?.shortName}
               </span>
               <StatusBadge status={latest.obs.status} />
             </div>
@@ -234,7 +234,7 @@ export default async function IndicadorPage({
             <ChartCard
               question={`¿Dónde ${indicator.id === "poblacion" ? "vive más gente" : "es mayor"}?`}
               subtitle={`${indicator.name} por departamento`}
-              sourceLine={`Fuente: ${source?.name} · ${ranking[0].obs.periodLabel}`}
+              sourceLine={`Fuente: ${getObservationSource(indicator.sourceId, ranking[0].obs)?.name} · ${ranking[0].obs.periodLabel}`}
               table={{
                 caption: `${indicator.name} por departamento`,
                 head: ["Departamento", indicator.name],

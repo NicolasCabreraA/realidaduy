@@ -58,7 +58,11 @@ jobs:
         continue-on-error: true
         run: node scripts/ingest/fetch-bcu-pib.mjs
 
+      # El CSV de delitos pesa unos 160 MB y el servidor a veces corta la
+      # descarga (pasó el 05/10/2026). Mismo criterio que PRISMA y el BCU: si
+      # falla, la corrida sigue con el archivo anterior y no frena el IPC.
       - name: Ingesta seguridad (Ministerio del Interior)
+        continue-on-error: true
         run: node scripts/ingest/fetch-seguridad.mjs
 
       - name: Ingesta elecciones (Corte Electoral, con verificación de totales)
