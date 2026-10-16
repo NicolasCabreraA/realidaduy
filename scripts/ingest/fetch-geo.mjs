@@ -23,6 +23,9 @@ import * as topojsonClient from "topojson-client";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const OUT_DIR = path.join(ROOT, "public", "geo");
 
+// Mismas URLs que src/data/limites.ts (las cita el mapa): si cambia una, cambiar las dos.
+// El conjunto ya no figura en el listado del catálogo (su página daba 404 al
+// revisarlo el 16/10/2026), pero el archivo sigue publicado.
 const DEPARTAMENTOS_URL =
   "https://catalogodatos.gub.uy/dataset/ide-limites-departamentales/resource/3c1b430a-c010-4db1-880d-bdc0f11e4ce9/download/departamentos.geojson";
 

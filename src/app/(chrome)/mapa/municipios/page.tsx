@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import MapExplorer from "@/components/map/MapExplorer";
+import MapSources from "@/components/map/MapSources";
+import CatalogCredit from "@/components/ui/CatalogCredit";
+import { CONJUNTO_ELECCIONES_2025 } from "@/data/catalogo";
+import { LIMITES_MUNICIPIOS_URL } from "@/data/limites";
 import { allMunicipioSummaries } from "@/lib/data/summaries";
 
 export const metadata: Metadata = {
@@ -44,15 +48,39 @@ export default function MapaMunicipiosPage() {
           showCodes={false}
         />
       </div>
-      <p className="mt-6 text-xs text-ink-faint">
-        Límites municipales: capa oficial de DINOT (Ministerio de Vivienda y Ordenamiento
-        Territorial) publicada por el Ministerio de Ambiente, construida desde las Series
-        Electorales 2025 (IDEuy y Corte Electoral, Circular Nº 12208). Las zonas en blanco
-        dentro de cada departamento no integran ningún municipio: es la situación real de
-        parte del territorio rural, no un dato faltante. Población e indicadores censales:
-        INE (Censo 2023 y Censo 2011 vía OTU/OPP). Gobierno: Corte Electoral, elecciones
-        municipales 2025.
-      </p>
+      <MapSources
+        territories={territories}
+        territoryNoun="municipios"
+        gobierno={
+          <>
+            resultados de las elecciones municipales 2025 del{" "}
+            <CatalogCredit sourceUrl={CONJUNTO_ELECCIONES_2025} />. Nombres de alcaldes y
+            alcaldesas según las actas de proclamación de las Juntas Electorales
+            Departamentales.
+          </>
+        }
+        limites={
+          <>
+            <a
+              className="underline decoration-line underline-offset-2 hover:decoration-primary"
+              href={LIMITES_MUNICIPIOS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              capa oficial «Municipios» de DINOT (Ministerio de Vivienda y Ordenamiento
+              Territorial)
+            </a>{" "}
+            (descarga directa en GeoJSON), publicada por el Ministerio de Ambiente y construida desde las Series
+            Electorales 2025 (IDEuy y Corte Electoral, Circular Nº 12208). Geometría
+            simplificada para la web.
+          </>
+        }
+      >
+        <p className="mt-3 text-sm text-ink-soft">
+          Las zonas en blanco dentro de cada departamento no integran ningún municipio: es
+          la situación real de parte del territorio rural, no un dato faltante.
+        </p>
+      </MapSources>
     </div>
   );
 }

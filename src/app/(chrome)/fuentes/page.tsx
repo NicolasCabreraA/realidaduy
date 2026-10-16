@@ -3,6 +3,13 @@ import { sources } from "@/data/sources";
 import { dictionary } from "@/data/dictionary";
 import { getSource } from "@/data/sources";
 import { StatusBadge } from "@/components/ui/Badge";
+import {
+  CATALOGO_NACIONAL,
+  LICENCIA_DAG,
+  catalogDatasetUrl,
+  catalogDatasets,
+} from "@/data/catalogo";
+import { LIMITES_DEPARTAMENTOS_URL, LIMITES_MUNICIPIOS_URL } from "@/data/limites";
 
 export const metadata: Metadata = {
   title: "Fuentes y metodología",
@@ -18,11 +25,14 @@ const LEVEL_LABEL: Record<string, string> = {
 
 const SECCIONES = [
   { id: "organismos", label: "Organismos" },
+  { id: "catalogo", label: "Datos abiertos" },
   { id: "tipos", label: "Tipos de dato" },
   { id: "diccionario", label: "Diccionario" },
   { id: "validacion", label: "Validación" },
   { id: "geo", label: "Límites" },
 ];
+
+const link = "font-semibold text-primary underline decoration-line underline-offset-2 hover:decoration-primary";
 
 const PASOS_VALIDACION = [
   "Se verifica la fuente: organismo competente y URL del dato concreto.",
@@ -93,6 +103,43 @@ export default function FuentesPage() {
             </article>
           ))}
         </div>
+      </section>
+
+      {/* Catálogo Nacional de Datos Abiertos */}
+      <section aria-labelledby="catalogo-titulo" className="mt-12 scroll-mt-20" id="catalogo">
+        <h2 id="catalogo-titulo" className="font-display text-2xl font-bold">
+          Conjuntos del Catálogo Nacional de Datos Abiertos
+        </h2>
+        <p className="mt-2 max-w-2xl text-sm text-ink-soft">
+          Estos conjuntos están publicados en el{" "}
+          <a className={link} href={CATALOGO_NACIONAL.url} target="_blank" rel="noopener noreferrer">
+            {CATALOGO_NACIONAL.name}
+          </a>{" "}
+          y se usan bajo la{" "}
+          <a className={link} href={LICENCIA_DAG.url} target="_blank" rel="noopener noreferrer">
+            {LICENCIA_DAG.name}
+          </a>
+          . Cada dato del sitio que sale de uno de ellos cita el conjunto con su nombre y un
+          enlace a su página en el catálogo.
+        </p>
+        <ul className="mt-4 grid gap-4 md:grid-cols-3">
+          {catalogDatasets.map((d) => (
+            <li key={d.id} className="rounded-2xl border border-line bg-surface p-5 shadow-card">
+              <a
+                className="block font-display text-base font-bold leading-snug text-ink underline decoration-line underline-offset-2 hover:decoration-primary"
+                href={catalogDatasetUrl(d)}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {d.title}
+              </a>
+              <p className="mt-1 text-xs font-bold uppercase tracking-wide text-ink-faint">
+                {d.organization}
+              </p>
+              <p className="mt-1.5 text-sm text-ink-soft">{d.usedFor}</p>
+            </li>
+          ))}
+        </ul>
       </section>
 
       {/* Tipos de dato */}
@@ -214,9 +261,12 @@ export default function FuentesPage() {
           <div className="rounded-2xl border border-line bg-surface p-5 shadow-card">
             <h3 className="font-display text-base font-bold">19 departamentos</h3>
             <p className="mt-1.5 text-sm text-ink-soft">
-              GeoJSON oficial de IDE Uruguay / Servicio Geográfico Militar, publicado en
-              catalogodatos.gub.uy bajo la Licencia de Datos Abiertos Uruguay. Geometría
-              simplificada para la web: no usar para fines catastrales.
+              <a className={link} href={LIMITES_DEPARTAMENTOS_URL} target="_blank" rel="noopener noreferrer">
+                GeoJSON oficial de IDE Uruguay / Servicio Geográfico Militar
+              </a>
+              , que se publicó en el Catálogo Nacional bajo la {LICENCIA_DAG.name}. El
+              conjunto ya no aparece en el listado del catálogo, pero el archivo sigue
+              publicado. Geometría simplificada para la web: no usar para fines catastrales.
             </p>
           </div>
           <div className="rounded-2xl border border-line bg-surface p-5 shadow-card">
@@ -231,9 +281,12 @@ export default function FuentesPage() {
           <div className="rounded-2xl border border-line bg-surface p-5 shadow-card md:col-span-2">
             <h3 className="font-display text-base font-bold">136 municipios del país</h3>
             <p className="mt-1.5 text-sm text-ink-soft">
-              Capa oficial &quot;Municipios&quot; de la Dirección Nacional de Ordenamiento
-              Territorial (MVOT), servida por el geoserver del Ministerio de Ambiente (WFS)
-              y actualizada al 18/09/2025. Construida a partir de las Series Electorales
+              <a className={link} href={LIMITES_MUNICIPIOS_URL} target="_blank" rel="noopener noreferrer">
+                Capa oficial «Municipios» de la Dirección Nacional de Ordenamiento
+                Territorial (MVOT)
+              </a>
+              , servida por el geoserver del Ministerio de Ambiente (WFS) y actualizada al
+              18/09/2025. Construida a partir de las Series Electorales
               2025 en cooperación entre IDEuy y la Corte Electoral (Circular Nº 12208).
               Los municipios no cubren todo el territorio: las zonas rurales sin municipio
               se muestran en blanco en el mapa. Geometría simplificada para la web: no usar

@@ -9,6 +9,7 @@ import ShareButton from "@/components/share/ShareButton";
 import { PartyBadge } from "@/components/ui/Badge";
 import { quantileScale } from "@/lib/scale";
 import { legendFormat } from "@/lib/format";
+import { CATALOGO_NACIONAL, CONJUNTO_ELECCIONES_2025 } from "@/data/catalogo";
 import type { MetricSummary, TerritorySummary } from "@/lib/data/summaries";
 
 export default function MapExplorer({
@@ -51,6 +52,18 @@ export default function MapExplorer({
   );
 
   const activeMetric = metricModes.find((m) => m.indicatorId === mode);
+
+  // Un mismo indicador puede venir de más de un origen según el territorio
+  // (p. ej. población municipal: OPP en el interior, INE en Montevideo).
+  const activeSources = useMemo(() => {
+    if (!activeMetric) return [];
+    const seen = new Map<string, MetricSummary>();
+    for (const t of territories) {
+      const m = t.metrics.find((x) => x.indicatorId === activeMetric.indicatorId);
+      if (m && !seen.has(m.sourceHref)) seen.set(m.sourceHref, m);
+    }
+    return [...seen.values()];
+  }, [territories, activeMetric]);
 
   const scale = useMemo(() => {
     if (!activeMetric) return null;
@@ -175,6 +188,35 @@ export default function MapExplorer({
                 title={`${activeMetric.name} · ${activeMetric.periodLabel}`}
               />
             ) : null}
+            <p data-no-export className="mt-2 text-xs text-ink-faint">
+              Fuente:{" "}
+              {activeMetric ? (
+                activeSources.map((m, i) => (
+                  <span key={m.sourceHref}>
+                    {i > 0 ? " · " : null}
+                    <a
+                      className="underline decoration-line underline-offset-2 hover:decoration-primary"
+                      href={m.sourceHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {m.datasetTitle
+                        ? `${m.sourceShort}, conjunto «${m.datasetTitle}» del ${CATALOGO_NACIONAL.name}`
+                        : `${m.sourceShort} (ver el dato)`}
+                    </a>
+                  </span>
+                ))
+              ) : (
+                <a
+                  className="underline decoration-line underline-offset-2 hover:decoration-primary"
+                  href={CONJUNTO_ELECCIONES_2025}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {`Corte Electoral, conjunto «Elecciones Departamentales y Municipales 2025» del ${CATALOGO_NACIONAL.name}`}
+                </a>
+              )}
+            </p>
           </div>
         </div>
         <p className="mt-3 text-xs text-ink-faint">

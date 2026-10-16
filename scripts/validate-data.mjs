@@ -21,7 +21,8 @@ const { bcuPibObservations } = await import("../src/data/observations/bcu-pib.ts
 const { bcuCotizacionesObservations } = await import("../src/data/observations/bcu-cotizaciones.ts");
 const { ineAnualesObservations } = await import("../src/data/observations/ine-anuales.ts");
 const { sources } = await import("../src/data/sources.ts");
-const { parties, elections, electionResults } = await import("../src/data/elections.ts");
+const { parties, elections, electionResults, turnout } = await import("../src/data/elections.ts");
+const { catalogDatasets } = await import("../src/data/catalogo.ts");
 
 const observations = [
   ...nationalObservations,
@@ -40,6 +41,14 @@ const observations = [
   ...ineAnualesObservations,
 ];
 
+const errors = [];
+const warnings = [];
+const indicatorIds = new Set(dictionary.map((i) => i.id));
+const territoryIds = new Set(allTerritories.map((t) => t.id));
+const sourceIds = new Set(sources.map((s) => s.id));
+const partyIds = new Set(parties.map((p) => p.id));
+const electionIds = new Set(elections.map((e) => e.id));
+
 // Población municipal: cobertura razonable (interior + los 8 de Montevideo) y
 // suma total menor que la población del país.
 {
@@ -52,14 +61,6 @@ const observations = [
   if (!(suma > 2000000 && suma < 3499451))
     errors.push(`Suma de población municipal fuera de rango: ${suma}`);
 }
-
-const errors = [];
-const warnings = [];
-const indicatorIds = new Set(dictionary.map((i) => i.id));
-const territoryIds = new Set(allTerritories.map((t) => t.id));
-const sourceIds = new Set(sources.map((s) => s.id));
-const partyIds = new Set(parties.map((p) => p.id));
-const electionIds = new Set(elections.map((e) => e.id));
 
 const PERIOD_RE = /^\d{4}(-((0[1-9]|1[0-2])(-([0-2]\d|3[01]))?|Q[1-4]|S[12]))?$/;
 
@@ -89,6 +90,43 @@ for (const o of observations) {
     if (vistas.has(`${k}|${tier}`)) errors.push(`Observación duplicada (${tier}): ${k}`);
     else vistas.set(`${k}|${tier}`, o);
   }
+}
+
+// Catálogo Nacional: la Licencia de Datos Abiertos pide citar cada conjunto con
+// su nombre y enlace, y el sitio lo hace desde src/data/catalogo.ts. Una URL del
+// catálogo que no esté registrada ahí se publicaría sin esa cita.
+{
+  const conocidos = new Set(catalogDatasets.flatMap((d) => [d.id, d.name]));
+  const conUrl = [
+    ...observations.map((o) => [`observación ${o.indicatorId}/${o.territoryId}/${o.period}`, o.sourceUrl]),
+    ...dictionary.map((i) => [`indicador ${i.id}`, i.sourceUrl]),
+    ...elections.map((e) => [`elección ${e.id}`, e.sourceUrl]),
+    ...electionResults.map((r) => [`resultado ${r.electionId}/${r.territoryId}/${r.partyId}`, r.sourceUrl]),
+    ...turnout.map((t) => [`participación ${t.electionId}`, t.sourceUrl]),
+  ];
+  const sinRegistrar = new Map();
+  for (const [ref, sourceUrl] of conUrl) {
+    if (!sourceUrl) continue;
+    let url;
+    try {
+      url = new URL(sourceUrl);
+    } catch {
+      continue;
+    }
+    if (url.hostname !== "catalogodatos.gub.uy") continue;
+    const conjunto = /^\/dataset\/([^/]+)/.exec(url.pathname)?.[1];
+    if (!conjunto || !conocidos.has(conjunto)) sinRegistrar.set(conjunto ?? sourceUrl, ref);
+  }
+  for (const [conjunto, ref] of sinRegistrar)
+    errors.push(`Conjunto del Catálogo Nacional sin registrar en src/data/catalogo.ts: ${conjunto} (${ref})`);
+}
+
+// Los datos y el diccionario no citan Wikipedia: cada uno enlaza al organismo.
+for (const [ref, sourceUrl] of [
+  ...observations.map((o) => [`${o.indicatorId}/${o.territoryId}/${o.period}`, o.sourceUrl]),
+  ...dictionary.map((i) => [`indicador ${i.id}`, i.sourceUrl]),
+]) {
+  if (/wikipedia\.org/i.test(sourceUrl ?? "")) errors.push(`Fuente Wikipedia en ${ref}`);
 }
 
 // Diccionario: fuentes válidas.

@@ -5,6 +5,8 @@ import { electionResults, getParty } from "@/data/elections";
 import { getLatest } from "@/lib/data";
 import { formatNumber } from "@/lib/format";
 import { PartyBadge } from "@/components/ui/Badge";
+import CatalogCredit from "@/components/ui/CatalogCredit";
+import { CONJUNTO_ELECCIONES_2025 } from "@/data/catalogo";
 
 export const metadata: Metadata = {
   title: "Municipios de Uruguay",
@@ -182,9 +184,10 @@ export default function MunicipiosPaisPage() {
       <p className="mt-10 text-xs text-ink-faint">
         Población: Censo 2023 (INE; interior elaborado por el Observatorio Territorio
         Uruguay de OPP; Montevideo por cartografía censal). Los municipios creados en la
-        expansión de 2025 todavía no tienen población censal agregada publicada. Los
-        nombres de alcaldes del interior se ingerirán desde las proclamaciones de las
-        Juntas Electorales. Para el mapa de la capital, mirá{" "}
+        expansión de 2025 todavía no tienen población censal agregada publicada.
+        Resultados: Corte Electoral, <CatalogCredit sourceUrl={CONJUNTO_ELECCIONES_2025} />.
+        Nombres de alcaldes y alcaldesas según las actas de proclamación de las Juntas
+        Electorales Departamentales. Para el mapa de la capital, mirá{" "}
         <Link className="font-semibold text-primary hover:underline" href="/montevideo/municipios">
           Montevideo por municipios
         </Link>

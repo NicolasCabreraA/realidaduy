@@ -1,6 +1,8 @@
 import type { Indicator, Observation } from "@/lib/types";
 import { getObservationSource, getSource } from "@/data/sources";
 import { StatusBadge } from "@/components/ui/Badge";
+import CatalogCredit from "@/components/ui/CatalogCredit";
+import { getCatalogDataset } from "@/data/catalogo";
 
 /** "¿De dónde sale este dato?" — provenance completo, expandible sin JS. */
 export default function SourceNote({
@@ -11,6 +13,8 @@ export default function SourceNote({
   obs?: Observation;
 }) {
   const source = obs ? getObservationSource(indicator.sourceId, obs) : getSource(indicator.sourceId);
+  const original = obs?.sourceUrl ?? indicator.sourceUrl;
+  const dataset = getCatalogDataset(original);
   return (
     <details className="fold rounded-2xl border border-line bg-surface px-4 py-3">
       <summary className="text-sm font-semibold text-primary">
@@ -60,16 +64,24 @@ export default function SourceNote({
             <dd>{obs.notes}</dd>
           </div>
         ) : null}
+        {dataset ? (
+          <div className="sm:col-span-2">
+            <dt className="font-bold text-ink-faint">Conjunto de datos abiertos</dt>
+            <dd>
+              Sale del <CatalogCredit sourceUrl={original} />.
+            </dd>
+          </div>
+        ) : null}
         <div className="sm:col-span-2">
           <dt className="font-bold text-ink-faint">Dato original</dt>
           <dd>
             <a
               className="break-all text-primary underline decoration-line underline-offset-2 hover:decoration-primary"
-              href={obs?.sourceUrl ?? indicator.sourceUrl}
+              href={original}
               rel="noopener noreferrer"
               target="_blank"
             >
-              {obs?.sourceUrl ?? indicator.sourceUrl}
+              {original}
             </a>
           </dd>
         </div>

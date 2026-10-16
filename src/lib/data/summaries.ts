@@ -4,6 +4,7 @@ import { departments, montevideoMunicipalities, municipalTerritories } from "@/d
 import { getGovernment, getParty } from "@/data/elections";
 import { getLatest, indicatorsForLevel } from "@/lib/data";
 import { getObservationSource } from "@/data/sources";
+import { dataHref, getCatalogDataset } from "@/data/catalogo";
 import { formatNumber, formatValue } from "@/lib/format";
 import type { Category, GeoLevel } from "@/lib/types";
 
@@ -22,6 +23,10 @@ export interface MetricSummary {
   display: string;
   periodLabel: string;
   sourceShort: string;
+  /** Enlace al dato: la página del conjunto si viene del Catálogo Nacional, si no la URL de origen. */
+  sourceHref: string;
+  /** Nombre del conjunto del Catálogo Nacional, si el dato sale de ahí. */
+  datasetTitle?: string;
 }
 
 export interface TerritorySummary {
@@ -60,6 +65,8 @@ function metricsFor(territoryId: string, level: GeoLevel): MetricSummary[] {
       display: formatValue(latest.obs.value, i.unit, i.decimals),
       periodLabel: latest.obs.periodLabel,
       sourceShort: getObservationSource(i.sourceId, latest.obs)?.shortName ?? i.sourceId,
+      sourceHref: dataHref(latest.obs.sourceUrl),
+      datasetTitle: getCatalogDataset(latest.obs.sourceUrl)?.title,
     });
   }
   return out;

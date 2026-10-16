@@ -11,6 +11,8 @@ import { PartyBadge } from "@/components/ui/Badge";
 import MetricCard from "@/components/charts/MetricCard";
 import ShareButton from "@/components/share/ShareButton";
 import SourceNote from "@/components/ui/SourceNote";
+import CatalogCredit from "@/components/ui/CatalogCredit";
+import { CONJUNTO_ELECCIONES_2024, CONJUNTO_ELECCIONES_2025 } from "@/data/catalogo";
 import StateView from "@/components/ui/StateView";
 import { SITE_NAME } from "@/lib/site";
 
@@ -182,7 +184,8 @@ export default async function DepartmentProfile({
             ) : null}
             <p className="mt-3 text-xs text-ink-faint">
               % sobre votos válidos al lema en {dept.name}. Fuente: Corte Electoral,
-              desglose oficial por circuito (11 de mayo de 2025).
+              desglose oficial por circuito (11 de mayo de 2025),{" "}
+              <CatalogCredit sourceUrl={CONJUNTO_ELECCIONES_2025} />.
             </p>
           </div>
           <div data-share-card className="rounded-2xl border border-line bg-surface p-4 shadow-card">
@@ -206,7 +209,8 @@ export default async function DepartmentProfile({
             )}
             <p className="mt-3 text-xs text-ink-faint">
               % sobre el total de votos emitidos en {dept.name} (27 de octubre de 2024).
-              Fuente: Corte Electoral, desglose oficial por circuito.
+              Fuente: Corte Electoral, desglose oficial por circuito,{" "}
+              <CatalogCredit sourceUrl={CONJUNTO_ELECCIONES_2024} />.
             </p>
             <Link
               href="/elecciones"
@@ -280,8 +284,13 @@ export default async function DepartmentProfile({
             </table>
           </div>
           <p className="mt-2 text-xs text-ink-faint">
-            Fuente: Corte Electoral, desglose oficial por circuito. No todo el territorio
-            departamental está municipalizado.
+            Resultados: Corte Electoral, desglose oficial por circuito,{" "}
+            <CatalogCredit sourceUrl={CONJUNTO_ELECCIONES_2025} />. Población: Censo 2023
+            del INE,{" "}
+            {dept.id === "UY-MO"
+              ? "agregada por municipio desde la cartografía censal."
+              : "por municipio según el Observatorio Territorio Uruguay (OPP)."}{" "}
+            No todo el territorio departamental está municipalizado.
           </p>
         </section>
       ) : null}
