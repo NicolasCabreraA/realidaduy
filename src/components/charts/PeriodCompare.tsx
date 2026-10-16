@@ -129,12 +129,12 @@ export default function PeriodCompare({
 
       <div className="grid gap-3 sm:grid-cols-2">
         {(["a", "b"] as const).map((which, i) => (
-          <label key={which} className="block text-sm">
+          <label key={which} className="block min-w-0 text-sm">
             <span className="font-semibold text-ink-soft">Período {i + 1}</span>
             <select
               value={which === "a" ? a : b}
               onChange={(e) => setPicks(which === "a" ? { a: e.target.value, b } : { a, b: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-line bg-surface px-3 py-2.5 text-base"
+              className="mt-1 w-full min-w-0 rounded-lg border border-control-line bg-surface px-3 py-2.5 text-base"
             >
               {periods.map((p) => (
                 <option key={p.period} value={p.period}>
@@ -153,7 +153,10 @@ export default function PeriodCompare({
 
       {lo && hi ? (
         <div className="mt-5 border-t border-line pt-4">
-          <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-3">
+          {/* En el celular, flex-wrap: si no entran (pantalla angosta o más
+              espaciado de texto), el segundo valor baja de línea en vez de
+              desbordar (WCAG 1.4.10 y 1.4.12). */}
+          <div className="flex flex-wrap items-end gap-x-3 gap-y-1 sm:grid sm:grid-cols-[1fr_auto_1fr]">
             <div className="min-w-0">
               <p className="text-xs font-semibold uppercase tracking-wide text-ink-faint">{lo.label}</p>
               <p className="tnum font-display text-2xl font-bold md:text-3xl">{fmt(lo.value)}</p>

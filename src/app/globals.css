@@ -6,7 +6,9 @@
   --color-surface: #ffffff;
   --color-ink: #16202b;
   --color-ink-soft: #46525e;
-  --color-ink-faint: #64707c;
+  /* Texto terciario: 4,5:1 o más sobre todos los fondos claros del sitio,
+     incluidos primary-soft y celeste-soft (WCAG 1.4.3). */
+  --color-ink-faint: #5c6874;
   --color-primary: #1e3a5f;
   --color-primary-hover: #16304f;
   --color-primary-soft: #e8eef5;
@@ -14,6 +16,9 @@
   --color-celeste-soft: #dde7f1;
   --color-celeste-deep: #4a75a0;
   --color-line: #e0e5e9;
+  /* Borde de los campos de formulario: 3:1 o más contra el fondo (WCAG 1.4.11).
+     --color-line es solo para separadores. */
+  --color-control-line: #7c8792;
   --color-focus: #b45309;
   --color-up: #166534;
   --color-down: #9f1239;
@@ -90,6 +95,17 @@ h4 {
   border-radius: 4px;
 }
 
+/* Sobre fondos oscuros (el héroe) el ámbar no llega a 3:1: el foco va en blanco. */
+.on-dark :focus-visible {
+  outline-color: #fff;
+}
+
+/* Territorios del mapa: el foco es un contorno del territorio que dibuja
+   ChoroplethMap (blanco y ámbar), no el rectángulo que lo encierra. */
+svg path[role="button"]:focus-visible {
+  outline: none;
+}
+
 ::selection {
   background: var(--color-primary);
   color: #fff;
@@ -147,7 +163,15 @@ details.fold[open] > summary::after {
   border-bottom: 1px solid var(--color-line);
   vertical-align: middle;
 }
-.tabla tbody tr:last-child td {
+.tabla tbody th[scope="row"] {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--color-line);
+  text-align: left;
+  font-weight: 600;
+  vertical-align: middle;
+}
+.tabla tbody tr:last-child td,
+.tabla tbody tr:last-child th[scope="row"] {
   border-bottom: none;
 }
 .tabla tbody td:first-child {

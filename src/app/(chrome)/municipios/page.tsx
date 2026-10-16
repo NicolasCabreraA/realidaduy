@@ -7,6 +7,7 @@ import { formatNumber } from "@/lib/format";
 import { PartyBadge } from "@/components/ui/Badge";
 import CatalogCredit from "@/components/ui/CatalogCredit";
 import { CONJUNTO_ELECCIONES_2025 } from "@/data/catalogo";
+import TableWrap from "@/components/ui/TableWrap";
 
 export const metadata: Metadata = {
   title: "Municipios de Uruguay",
@@ -133,7 +134,7 @@ export default function MunicipiosPaisPage() {
                   Ver perfil del departamento →
                 </Link>
               </div>
-              <div className="tablewrap mt-3">
+              <TableWrap label={`Municipios de ${d.name}`} className="mt-3">
                 <table className="tabla min-w-[480px]">
                   <caption className="sr-only">
                     Municipios de {d.name}: población, lema ganador y porcentaje en 2025
@@ -176,7 +177,7 @@ export default function MunicipiosPaisPage() {
                     })}
                   </tbody>
                 </table>
-              </div>
+              </TableWrap>
             </section>
           );
         })}

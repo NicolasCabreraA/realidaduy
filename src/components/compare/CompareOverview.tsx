@@ -2,6 +2,7 @@ import Link from "next/link";
 import { formatNumber } from "@/lib/format";
 import type { Category } from "@/lib/types";
 import type { MetricSummary, TerritorySummary } from "@/lib/data/summaries";
+import TableWrap from "@/components/ui/TableWrap";
 
 // Vista general del comparador: todos los indicadores a la vez, una columna por
 // territorio (idea tomada del comparador de prestadores de AtuServicio.uy).
@@ -34,7 +35,7 @@ export default function CompareOverview({ territories }: { territories: Territor
   const hasGov = territories.some((t) => t.gov);
 
   return (
-    <div className="tablewrap compare-overview">
+    <TableWrap label="Comparación de todos los indicadores" className="compare-overview">
       <table className="tabla">
         <caption className="sr-only">
           Todos los indicadores de {territories.map((t) => t.name).join(", ")}, lado a lado
@@ -147,6 +148,6 @@ export default function CompareOverview({ territories }: { territories: Territor
           );
         })}
       </table>
-    </div>
+    </TableWrap>
   );
 }

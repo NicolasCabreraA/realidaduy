@@ -22,10 +22,14 @@ export default function Delta({
     color = direction === "up" ? "text-up" : direction === "down" ? "text-down" : "text-ink-soft";
   }
   const arrow = direction === "up" ? "↑" : direction === "down" ? "↓" : "→";
+  // Lo que el color dice (mejora o empeora), también en texto para lectores de pantalla.
+  const reading =
+    color === "text-up" ? "mejora" : color === "text-down" ? "empeora" : null;
   return (
     <span className={`inline-flex items-center gap-1 text-sm font-semibold ${color}`}>
       <span aria-hidden>{arrow}</span>
       <span className="tnum">{formatDelta(delta, indicator.unit, indicator.decimals)}</span>
+      {reading ? <span className="sr-only">({reading})</span> : null}
       {prevLabel ? <span className="font-normal text-ink-faint">vs {prevLabel}</span> : null}
     </span>
   );

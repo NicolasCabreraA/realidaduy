@@ -33,7 +33,9 @@ export default function Sparkline({
       width={width}
       height={height}
       aria-hidden
-      className="overflow-visible"
+      // max-w-full: en pantallas de 320 px la tarjeta es más angosta que el
+      // ancho nominal y el gráfico desbordaba la página (WCAG 1.4.10).
+      className="h-auto max-w-full overflow-visible"
     >
       <defs>
         <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">

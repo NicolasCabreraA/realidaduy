@@ -7,6 +7,7 @@ import ChoroplethMap, { type MapEntry } from "@/components/map/ChoroplethMap";
 import { CategoricalLegend, SequentialLegend } from "@/components/map/MapLegend";
 import ShareButton from "@/components/share/ShareButton";
 import { PartyBadge } from "@/components/ui/Badge";
+import TableWrap from "@/components/ui/TableWrap";
 import { quantileScale } from "@/lib/scale";
 import { legendFormat } from "@/lib/format";
 import { CATALOGO_NACIONAL, CONJUNTO_ELECCIONES_2025 } from "@/data/catalogo";
@@ -106,6 +107,33 @@ export default function MapExplorer({
   }, [territories]);
 
   const selected = selectedId ? byId[selectedId] : null;
+
+  // Lo mismo que muestra el mapa, en texto: el color no puede ser la única
+  // forma de leer el dato (WCAG 1.4.1 y 1.1.1). De mayor a menor.
+  const tableRows = useMemo(() => {
+    if (mode === "gobierno") {
+      return territories
+        .map((t) => ({
+          id: t.id,
+          name: t.name,
+          cells: [t.gov?.partyName ?? "Sin datos", t.gov?.electedName ?? "—"],
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name, "es"));
+    }
+    return territories
+      .map((t) => ({ t, m: t.metrics.find((x) => x.indicatorId === mode) }))
+      .sort((a, b) => (b.m?.value ?? -Infinity) - (a.m?.value ?? -Infinity))
+      .map(({ t, m }) => ({
+        id: t.id,
+        name: t.name,
+        cells: [m?.display ?? "Sin datos", m?.periodLabel ?? "—"],
+      }));
+  }, [territories, mode]);
+  const tableHead =
+    mode === "gobierno"
+      ? ["Partido de gobierno", territories[0]?.level === "municipio" ? "Alcalde/sa" : "Intendente/a"]
+      : [activeMetric?.name ?? "Valor", "Período"];
+  const levelName = territories[0]?.level === "municipio" ? "Municipio" : "Departamento";
 
   return (
     <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-6">
@@ -219,9 +247,47 @@ export default function MapExplorer({
             </p>
           </div>
         </div>
+        <details data-no-export className="fold mt-3">
+          <summary className="pressable inline-block rounded-lg text-sm font-semibold text-primary">
+            Ver los datos del mapa en una tabla
+          </summary>
+          <TableWrap label={`Datos del mapa: ${tableHead[0]}`} className="mt-2">
+            <table className="tabla min-w-[320px]">
+              <caption className="sr-only">
+                {mode === "gobierno"
+                  ? "Partido de gobierno de cada territorio del mapa"
+                  : `${activeMetric?.name ?? ""} en cada territorio del mapa, de mayor a menor`}
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">{levelName}</th>
+                  {tableHead.map((h) => (
+                    <th key={h} scope="col" className={mode === "gobierno" ? undefined : "num"}>
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {tableRows.map((r) => (
+                  <tr key={r.id}>
+                    <th scope="row" className="text-left font-semibold">
+                      {r.name}
+                    </th>
+                    {r.cells.map((c, j) => (
+                      <td key={j} className={mode === "gobierno" ? undefined : "num"}>
+                        {c}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </TableWrap>
+        </details>
         <p className="mt-3 text-xs text-ink-faint">
-          Navegable con teclado: usá Tab para recorrer los territorios y Enter para
-          seleccionar.
+          Con teclado: Tab recorre los territorios, Enter o Espacio selecciona y Escape
+          cierra el cartel. El enlace «Saltar el mapa» aparece al empezar.
         </p>
       </div>
 

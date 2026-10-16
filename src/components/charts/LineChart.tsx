@@ -1,6 +1,6 @@
 "use client";
 
-import { useId } from "react";
+import { useEffect, useId, useState } from "react";
 import {
   Area,
   AreaChart,
@@ -29,8 +29,24 @@ export default function LineChart({
 }) {
   const gradientId = useId().replace(/[:]/g, "");
   const last = data[data.length - 1];
+  // El cartel del puntero se cierra con Escape (WCAG 1.4.13) y vuelve al
+  // mover el mouse. Los mismos datos están en la tabla "Ver datos".
+  const [tipHidden, setTipHidden] = useState(false);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setTipHidden(true);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
   return (
-    <div aria-hidden className="h-64 w-full md:h-72">
+    <div
+      aria-hidden
+      className="h-64 w-full md:h-72"
+      onMouseMove={() => {
+        if (tipHidden) setTipHidden(false);
+      }}
+    >
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data} margin={{ top: 8, right: 14, bottom: 0, left: 0 }}>
           <defs>
@@ -57,6 +73,7 @@ export default function LineChart({
             }
           />
           <Tooltip
+            active={tipHidden ? false : undefined}
             cursor={{ stroke: "var(--color-ink-faint)", strokeDasharray: "3 3" }}
             formatter={(value) => [formatValue(Number(value), unit, decimals), ""]}
             separator=""

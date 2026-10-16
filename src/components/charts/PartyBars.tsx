@@ -39,7 +39,9 @@ export default function PartyBars({
                 : "grid-cols-[10rem_1fr_auto] sm:grid-cols-[13rem_1fr_auto]"
             }`}
           >
-            <span className="truncate font-semibold">{r.name}</span>
+            {/* Sin truncar: con zoom o más espaciado de texto el nombre baja de
+                línea en vez de cortarse (WCAG 1.4.10 y 1.4.12). */}
+            <span className="min-w-0 break-words font-semibold leading-tight">{r.name}</span>
             <span aria-hidden className="h-5 overflow-hidden rounded-r-sm bg-canvas">
               <motion.span
                 data-bar

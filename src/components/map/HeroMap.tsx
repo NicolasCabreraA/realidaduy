@@ -10,6 +10,9 @@ import { motion, useReducedMotion } from "motion/react";
  * Firma visual del sitio: el país dibujado con su propia cartografía.
  * Los 19 departamentos aparecen uno a uno al cargar; al tocar uno se
  * abre el mapa interactivo. Con prefers-reduced-motion se muestra estático.
+ * Es un atajo para el mouse y el dedo: para el teclado y los lectores de
+ * pantalla queda fuera, porque los 19 departamentos llevaban al mismo lugar
+ * que el botón "Explorá el mapa" que está al lado (19 paradas de Tab de más).
  */
 
 const WIDTH = 520;
@@ -68,8 +71,7 @@ export default function HeroMap({ className }: Props) {
     <div className={`relative ${className ?? ""}`}>
       <svg
         viewBox={`0 0 ${WIDTH} ${layout.height}`}
-        role="group"
-        aria-label="Mapa de los 19 departamentos de Uruguay. Tocá un departamento para abrir el mapa interactivo."
+        aria-hidden
         className="h-auto w-full drop-shadow-[0_12px_40px_rgba(0,0,0,0.35)]"
       >
         {layout.features.map((f, i) => (
@@ -84,27 +86,18 @@ export default function HeroMap({ className }: Props) {
             stroke="var(--color-primary)"
             strokeWidth={0.8}
             strokeLinejoin="round"
-            role="link"
-            tabIndex={0}
-            aria-label={`${f.name}: abrir en el mapa interactivo`}
-            className="cursor-pointer transition-[fill,fill-opacity] duration-150 focus:outline-none"
+            className="cursor-pointer transition-[fill,fill-opacity] duration-150"
             onClick={() => router.push("/mapa")}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                router.push("/mapa");
-              }
-            }}
             onMouseEnter={() => setHovered(f.id)}
             onMouseLeave={() => setHovered(null)}
-            onFocus={() => setHovered(f.id)}
-            onBlur={() => setHovered(null)}
           />
         ))}
       </svg>
+      {/* Debajo del mapa y no encima: sobre el relleno claro de la costa el
+          texto blanco quedaba sin contraste. */}
       <p
         aria-hidden
-        className="pointer-events-none absolute -bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap text-sm font-semibold text-white/80"
+        className="pointer-events-none mt-2 text-center text-sm font-semibold text-white/80"
       >
         {hoveredName ?? "19 departamentos · tocá para explorar"}
       </p>
