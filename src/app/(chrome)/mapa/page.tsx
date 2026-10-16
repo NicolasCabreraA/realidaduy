@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import MapExplorer from "@/components/map/MapExplorer";
+import MapSources from "@/components/map/MapSources";
+import CatalogCredit from "@/components/ui/CatalogCredit";
+import { CONJUNTO_ELECCIONES_2025, LICENCIA_DAG } from "@/data/catalogo";
+import { LIMITES_DEPARTAMENTOS_URL } from "@/data/limites";
 import { departmentSummaries } from "@/lib/data/summaries";
 
 export const metadata: Metadata = {
@@ -42,13 +46,39 @@ export default function MapaPage() {
           mapTitle="Mapa de los 19 departamentos de Uruguay"
         />
       </div>
-      <p className="mt-6 text-xs text-ink-faint">
-        Límites: IDE / Servicio Geográfico Militar vía catalogodatos.gub.uy (Licencia de
-        Datos Abiertos Uruguay). Población: INE, Censo 2023. Desempleo, pobreza e
-        informalidad: ECH del INE (elaboraciones INE y Observatorio Social del MIDES).
-        Gobierno: Corte Electoral, elecciones departamentales 2025. Cada indicador tiene su
-        metodología en su propia página.
-      </p>
+      <MapSources
+        territories={territories}
+        territoryNoun="departamentos"
+        gobierno={
+          <>
+            resultados de las elecciones departamentales 2025 del{" "}
+            <CatalogCredit sourceUrl={CONJUNTO_ELECCIONES_2025} />.
+          </>
+        }
+        limites={
+          <>
+            <a
+              className="underline decoration-line underline-offset-2 hover:decoration-primary"
+              href={LIMITES_DEPARTAMENTOS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              archivo de límites departamentales de IDE Uruguay / Servicio Geográfico Militar
+            </a>
+            , que se publicó en el Catálogo Nacional bajo la{" "}
+            <a
+              className="underline decoration-line underline-offset-2 hover:decoration-primary"
+              href={LICENCIA_DAG.url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {LICENCIA_DAG.name}
+            </a>
+            . El conjunto ya no aparece en el listado del catálogo, pero el archivo sigue
+            publicado. Geometría simplificada para la web.
+          </>
+        }
+      />
     </div>
   );
 }

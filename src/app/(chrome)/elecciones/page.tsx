@@ -15,6 +15,8 @@ import ChoroplethMap from "@/components/map/ChoroplethMap";
 import PartyBars from "@/components/charts/PartyBars";
 import ShareButton from "@/components/share/ShareButton";
 import EmbedButton from "@/components/embed/EmbedButton";
+import CatalogCredit from "@/components/ui/CatalogCredit";
+import { CONJUNTO_ELECCIONES_2024, CONJUNTO_ELECCIONES_2025 } from "@/data/catalogo";
 
 export const metadata: Metadata = {
   title: "¿Cómo votó Uruguay?",
@@ -181,8 +183,9 @@ export default function EleccionesPage() {
             <a className="underline" href={eleccion2024.sourceUrl} target="_blank" rel="noopener noreferrer">
               resultados oficiales
             </a>
-            ). Los porcentajes se expresan sobre el total de votos emitidos (la forma en que
-            se difundieron públicamente); &quot;Otros, en blanco y anulados&quot; es el resto hasta
+            ); por departamento, <CatalogCredit sourceUrl={CONJUNTO_ELECCIONES_2024} />. Los
+            porcentajes se expresan sobre el total de votos emitidos (la forma en que se
+            difundieron públicamente); &quot;Otros, en blanco y anulados&quot; es el resto hasta
             el 100%.
           </p>
         </figure>
@@ -357,8 +360,9 @@ export default function EleccionesPage() {
           </div>
           <p className="mt-3 text-xs text-ink-faint">
             Fuente: Corte Electoral (desglose oficial por circuito, agregado y verificado
-            automáticamente contra los lemas ganadores). El detalle completo por partido
-            está en el perfil de cada departamento.
+            automáticamente contra los lemas ganadores),{" "}
+            <CatalogCredit sourceUrl={CONJUNTO_ELECCIONES_2025} />. El detalle completo por
+            partido está en el perfil de cada departamento.
           </p>
         </figure>
       </section>
@@ -420,7 +424,8 @@ export default function EleccionesPage() {
             </div>
           </div>
           <p className="mt-3 text-xs text-ink-faint">
-            Fuente: Corte Electoral (desglose oficial por circuito). En el Municipio F la
+            Fuente: Corte Electoral (desglose oficial por circuito),{" "}
+            <CatalogCredit sourceUrl={CONJUNTO_ELECCIONES_2025} />. En el Municipio F la
             definición llegó tras el escrutinio de votos observados: FA 19.590 vs CR 19.009
             (581 votos de diferencia).
           </p>

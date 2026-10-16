@@ -3,8 +3,9 @@ import type { Observation } from "@/lib/types";
 // Población por departamento — Censo 2023, resultados finales (INE).
 // Verificación por consistencia: la suma de los 19 departamentos da exactamente
 // 3.499.451, igual al total oficial publicado por INE/OPP/Presidencia.
+// Tabla 1 del informe (página 4): población por departamento.
 const CENSUS_SOURCE =
-  "https://www5.ine.gub.uy/documents/CENSO%202023/Poblaci%C3%B3n%20estimada,%20crecimiento%20intercensal%20y%20estructura%20por%20sexo%20y%20edad.pdf";
+  "https://www5.ine.gub.uy/documents/CENSO%202023/Poblaci%C3%B3n%20estimada,%20crecimiento%20intercensal%20y%20estructura%20por%20sexo%20y%20edad.pdf#page=4";
 
 const population2023: [string, number][] = [
   ["UY-MO", 1302954],

@@ -14,11 +14,12 @@ export const nationalObservations: Observation[] = [
     value: 3499451,
     status: "OFFICIAL",
     demo: false,
+    // Tabla 1 del informe del INE: población por departamento y total del país.
     sourceUrl:
-      "https://www.gub.uy/presidencia/comunicacion/noticias/censo-nacional-2023-contabilizo-3499451-habitantes-uruguay",
+      "https://www5.ine.gub.uy/documents/CENSO%202023/Poblaci%C3%B3n%20estimada,%20crecimiento%20intercensal%20y%20estructura%20por%20sexo%20y%20edad.pdf#page=4",
     retrievedAt: "2026-08-26",
     notes:
-      "Resultados finales del Censo 2023 (publicados en diciembre de 2024). Cifra verificada dígito a dígito contra el PDF oficial del INE (auditoría 2026-08-26).",
+      "Resultados finales del Censo 2023 (publicados en diciembre de 2024). Tabla 1 del informe del INE «Población estimada, crecimiento intercensal y estructura por sexo y edad». Cifra verificada dígito a dígito (auditoría 2026-08-26).",
   },
   // ── Economía ───────────────────────────────────────────────
   // El PIB trimestral sale del BCU con scripts/ingest/fetch-bcu-pib.mjs.

@@ -20,7 +20,7 @@ export const dictionary: Indicator[] = [
     unitLabel: "habitantes",
     sourceId: "ine",
     sourceUrl:
-      "https://www5.ine.gub.uy/documents/CENSO%202023/Poblaci%C3%B3n%20estimada,%20crecimiento%20intercensal%20y%20estructura%20por%20sexo%20y%20edad.pdf",
+      "https://www5.ine.gub.uy/documents/CENSO%202023/Poblaci%C3%B3n%20estimada,%20crecimiento%20intercensal%20y%20estructura%20por%20sexo%20y%20edad.pdf#page=4",
     periodicity: "decenal",
     geographicLevel: ["pais", "departamento", "municipio"],
     availableFrom: "2023",
@@ -122,7 +122,9 @@ export const dictionary: Indicator[] = [
     unit: "%",
     unitLabel: "variación respecto al mismo mes del año anterior",
     sourceId: "ine",
-    sourceUrl: "https://www7.ine.gub.uy/Dashboard-IPC/",
+    // Serie completa del IPC (planilla del INE); cada mes además enlaza a su informe.
+    sourceUrl:
+      "https://www5.ine.gub.uy/documents/Estad%C3%ADsticasecon%C3%B3micas/SERIES%20Y%20OTROS/IPC/Base%20Octubre%202022=100/IPC%20gral%20y%20variaciones_base%202022.xlsx",
     periodicity: "mensual",
     geographicLevel: ["pais"],
     availableFrom: "1998",
