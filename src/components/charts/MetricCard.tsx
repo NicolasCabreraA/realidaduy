@@ -79,7 +79,7 @@ export default function MetricCard({
           <p className="mt-auto pt-2 text-xs text-ink-faint">
             {obs.periodLabel} · {source?.shortName ?? indicator.sourceId}
             {series.length >= 4 ? (
-              <span className="text-ink-faint/70"> · serie desde {history[0].period}</span>
+              <span> · serie desde {history[0].period}</span>
             ) : null}
           </p>
         </TextureCardContent>

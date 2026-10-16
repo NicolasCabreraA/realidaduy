@@ -15,6 +15,7 @@ import CatalogCredit from "@/components/ui/CatalogCredit";
 import { CONJUNTO_ELECCIONES_2024, CONJUNTO_ELECCIONES_2025 } from "@/data/catalogo";
 import StateView from "@/components/ui/StateView";
 import { SITE_NAME } from "@/lib/site";
+import TableWrap from "@/components/ui/TableWrap";
 
 export function generateStaticParams() {
   return departments.map((d) => ({ slug: d.slug }));
@@ -240,7 +241,7 @@ export default async function DepartmentProfile({
               Ver los 136 del país →
             </Link>
           </div>
-          <div className="tablewrap mt-4">
+          <TableWrap label={`Municipios de ${dept.name}`} className="mt-4">
             <table className="tabla min-w-[420px]">
               <caption className="sr-only">
                 Municipios de {dept.name} y lema ganador de la alcaldía en 2025
@@ -282,7 +283,7 @@ export default async function DepartmentProfile({
                 })}
               </tbody>
             </table>
-          </div>
+          </TableWrap>
           <p className="mt-2 text-xs text-ink-faint">
             Resultados: Corte Electoral, desglose oficial por circuito,{" "}
             <CatalogCredit sourceUrl={CONJUNTO_ELECCIONES_2025} />. Población: Censo 2023

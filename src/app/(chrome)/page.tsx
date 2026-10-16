@@ -26,7 +26,7 @@ export default function Home() {
     });
   return (
     <>
-      <section className="relative overflow-hidden bg-gradient-to-b from-primary to-primary-hover text-white">
+      <section className="on-dark relative overflow-hidden bg-gradient-to-b from-primary to-primary-hover text-white">
         <div aria-hidden className="dot-grid absolute inset-0" />
         <div
           aria-hidden
@@ -152,7 +152,7 @@ export default function Home() {
                   Los 8 municipios de la capital: gobierno, población y comparaciones.
                 </p>
               </div>
-              <p className="shrink-0 font-display font-semibold text-celeste group-hover:underline">
+              <p className="shrink-0 font-display font-semibold text-celeste-soft group-hover:underline">
                 Ver municipios →
               </p>
             </Link>

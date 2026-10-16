@@ -105,8 +105,15 @@ export default function DatosPage() {
             botón <strong>Insertar</strong> de cada indicador te da el código armado; también
             podés escribirlo a mano:
           </p>
-          <pre className="tablewrap overflow-x-auto rounded-xl border border-line bg-canvas p-3 text-xs text-ink">
+          {/* Focalizable: en el celular el código se desliza y tiene que poder
+              desplazarse con el teclado (WCAG 2.1.1). */}
+          <pre
+            tabIndex={0}
+            aria-label="Código de ejemplo para insertar un mapa"
+            className="tablewrap overflow-x-auto rounded-xl border border-line bg-canvas p-3 text-xs text-ink"
+          >
             <code>{`<iframe src="${SITE_URL}/embed/mapa/desempleo"
+  title="Tasa de desempleo por departamento — mapa de realidad.uy"
   width="100%" height="660" loading="lazy"
   style="border:1px solid #e0e5e9;border-radius:12px"></iframe>`}</code>
           </pre>

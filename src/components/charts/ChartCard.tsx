@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import ShareButton from "@/components/share/ShareButton";
 import { toSlug } from "@/lib/format";
+import TableWrap from "@/components/ui/TableWrap";
 
 /**
  * Marco estándar de todo gráfico: título-pregunta, fuente, período,
@@ -42,7 +43,7 @@ export default function ChartCard({
         <summary className="pressable inline-block rounded-lg text-sm font-semibold text-primary">
           Ver datos
         </summary>
-        <div className="tablewrap mt-2">
+        <TableWrap label={table.caption} className="mt-2">
           <table className="tabla min-w-[320px]">
             <caption className="sr-only">{table.caption}</caption>
             <thead>
@@ -66,7 +67,7 @@ export default function ChartCard({
               ))}
             </tbody>
           </table>
-        </div>
+        </TableWrap>
       </details>
       <p className="mt-3 text-xs text-ink-faint">{sourceLine}</p>
       {note ? <p className="mt-1 text-xs text-ink-faint">{note}</p> : null}

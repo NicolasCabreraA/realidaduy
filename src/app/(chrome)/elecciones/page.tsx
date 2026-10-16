@@ -17,6 +17,7 @@ import ShareButton from "@/components/share/ShareButton";
 import EmbedButton from "@/components/embed/EmbedButton";
 import CatalogCredit from "@/components/ui/CatalogCredit";
 import { CONJUNTO_ELECCIONES_2024, CONJUNTO_ELECCIONES_2025 } from "@/data/catalogo";
+import TableWrap from "@/components/ui/TableWrap";
 
 export const metadata: Metadata = {
   title: "¿Cómo votó Uruguay?",
@@ -151,7 +152,7 @@ export default function EleccionesPage() {
             <summary className="pressable inline-block rounded-lg text-sm font-semibold text-primary">
               Ver datos
             </summary>
-            <div className="tablewrap mt-2">
+            <TableWrap label="Resultados de la primera vuelta 2024" className="mt-2">
               <table className="tabla min-w-[360px]">
                 <caption className="sr-only">Resultados de la primera vuelta 2024</caption>
                 <thead>
@@ -176,7 +177,7 @@ export default function EleccionesPage() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </TableWrap>
           </details>
           <p className="mt-3 text-xs text-ink-faint">
             Fuente: Corte Electoral (
@@ -220,7 +221,7 @@ export default function EleccionesPage() {
                 <CategoricalLegend items={dept2024Parties} title="Partido más votado" />
               </div>
             </div>
-            <div className="tablewrap">
+            <TableWrap label="Partido más votado por departamento, 2024">
               <table className="tabla">
                 <caption className="sr-only">Partido más votado por departamento, primera vuelta 2024</caption>
                 <thead>
@@ -244,7 +245,7 @@ export default function EleccionesPage() {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </TableWrap>
           </div>
           <p className="mt-3 text-xs text-ink-faint">
             Los totales nacionales de esta agregación coinciden exactamente con el
@@ -330,7 +331,7 @@ export default function EleccionesPage() {
                 <CategoricalLegend items={deptParties} title="Lema ganador" />
               </div>
             </div>
-            <div className="tablewrap">
+            <TableWrap label="Intendentes electos, 2025">
               <table className="tabla min-w-[380px]">
                 <caption className="sr-only">Intendentes electos por departamento, 2025</caption>
                 <thead>
@@ -356,7 +357,7 @@ export default function EleccionesPage() {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </TableWrap>
           </div>
           <p className="mt-3 text-xs text-ink-faint">
             Fuente: Corte Electoral (desglose oficial por circuito, agregado y verificado
@@ -395,7 +396,7 @@ export default function EleccionesPage() {
                 <CategoricalLegend items={muniParties} title="Lema ganador" />
               </div>
             </div>
-            <div className="tablewrap">
+            <TableWrap label="Alcaldes electos en Montevideo, 2025">
               <table className="tabla min-w-[380px]">
                 <caption className="sr-only">Alcaldes electos por municipio de Montevideo, 2025</caption>
                 <thead>
@@ -421,7 +422,7 @@ export default function EleccionesPage() {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </TableWrap>
           </div>
           <p className="mt-3 text-xs text-ink-faint">
             Fuente: Corte Electoral (desglose oficial por circuito),{" "}

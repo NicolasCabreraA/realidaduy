@@ -6,6 +6,7 @@ import ShareButton from "@/components/share/ShareButton";
 import CompareOverview from "@/components/compare/CompareOverview";
 import { formatNumber } from "@/lib/format";
 import type { MetricSummary, TerritorySummary } from "@/lib/data/summaries";
+import TableWrap from "@/components/ui/TableWrap";
 
 const EMPTY = "";
 
@@ -85,7 +86,7 @@ export default function CompareTool({
         </legend>
         <div className="grid gap-3 sm:grid-cols-3">
           {[0, 1, 2].map((i) => (
-            <label key={i} className="block text-sm">
+            <label key={i} className="block min-w-0 text-sm">
               <span className="font-semibold text-ink-soft">
                 Territorio {i + 1}
                 {i === 2 ? " (opcional)" : ""}
@@ -93,7 +94,7 @@ export default function CompareTool({
               <select
                 value={picks[i]}
                 onChange={(e) => update(i, e.target.value)}
-                className="mt-1 w-full rounded-lg border border-line bg-surface px-3 py-2.5 text-base"
+                className="mt-1 w-full min-w-0 rounded-lg border border-control-line bg-surface px-3 py-2.5 text-base"
               >
                 <option value={EMPTY}>— Elegir —</option>
                 <optgroup label="Departamentos">
@@ -120,7 +121,7 @@ export default function CompareTool({
             <select
               value={meta?.indicatorId ?? ""}
               onChange={(e) => setIndicatorId(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-line bg-surface px-3 py-2.5 text-base sm:max-w-sm"
+              className="mt-1 w-full min-w-0 rounded-lg border border-control-line bg-surface px-3 py-2.5 text-base sm:max-w-sm"
             >
               {indicatorOptions.map((m) => (
                 <option key={m.indicatorId} value={m.indicatorId}>
@@ -215,7 +216,7 @@ export default function CompareTool({
             </div>
 
             {withData.length >= 2 && base ? (
-              <div className="tablewrap mt-5">
+              <TableWrap label={`Comparación de ${meta.name}`} className="mt-5">
                 <table className="tabla min-w-[420px]">
                   <caption className="sr-only">
                     Comparación de {meta.name} entre los territorios elegidos
@@ -251,7 +252,7 @@ export default function CompareTool({
                     })}
                   </tbody>
                 </table>
-              </div>
+              </TableWrap>
             ) : null}
             <p className="mt-3 text-xs text-ink-faint">
               Fuente: {meta.sourceShort} · {meta.periodLabel}. Metodología y definición en{" "}

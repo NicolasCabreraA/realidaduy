@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { geoMercator, geoPath } from "d3-geo";
 import type { FeatureCollection, Feature, Geometry } from "geojson";
 import StateView from "@/components/ui/StateView";
@@ -28,6 +28,15 @@ type Props = {
 
 const WIDTH = 720;
 
+// Navegadores sin :focus-visible tiran error al consultarlo: ahí se marca siempre.
+function isFocusVisible(el: Element): boolean {
+  try {
+    return el.matches(":focus-visible");
+  } catch {
+    return true;
+  }
+}
+
 export default function ChoroplethMap({
   geoUrl,
   backdropUrl,
@@ -41,7 +50,29 @@ export default function ChoroplethMap({
   const [backdropFc, setBackdropFc] = useState<FeatureCollection | null>(null);
   const [error, setError] = useState(false);
   const [tooltip, setTooltip] = useState<{ x: number; y: number; id: string } | null>(null);
+  // Territorio con foco de teclado: se marca con un contorno de dos tonos
+  // (blanco y ámbar) dibujado encima, visible sobre cualquier relleno.
+  const [focusedId, setFocusedId] = useState<string | null>(null);
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const afterMapId = useId();
+
+  // El cartel se cierra con Escape sin mover el mouse ni el foco (WCAG 1.4.13).
+  useEffect(() => {
+    if (!tooltip) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setTooltip(null);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [tooltip]);
+
+  useEffect(
+    () => () => {
+      if (hideTimer.current) clearTimeout(hideTimer.current);
+    },
+    []
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -101,18 +132,39 @@ export default function ChoroplethMap({
     );
   }
 
-  const handleMove = (e: React.MouseEvent, id: string) => {
+  // El cartel se ancla al centro del territorio (no sigue al puntero), así se
+  // puede pasar el mouse por encima sin que desaparezca (WCAG 1.4.13).
+  const showTooltip = (f: { id: string; centroid: [number, number] }) => {
+    if (hideTimer.current) clearTimeout(hideTimer.current);
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
-    setTooltip({ x: e.clientX - rect.left, y: e.clientY - rect.top, id });
+    const scale = rect.width / WIDTH;
+    setTooltip({ x: f.centroid[0] * scale, y: f.centroid[1] * scale, id: f.id });
+  };
+  const hideTooltipSoon = () => {
+    if (hideTimer.current) clearTimeout(hideTimer.current);
+    hideTimer.current = setTimeout(() => setTooltip(null), 200);
+  };
+  const keepTooltip = () => {
+    if (hideTimer.current) clearTimeout(hideTimer.current);
   };
 
   const ordered = [...layout.features].sort((a, b) =>
     a.id === selectedId ? 1 : b.id === selectedId ? -1 : 0
   );
 
+  const outlined = layout.features.filter((f) => f.id === selectedId || f.id === focusedId);
+
   return (
     <div ref={containerRef} className="relative w-full">
+      {/* Con teclado, cada territorio es una parada de Tab (136 en el mapa de
+          municipios): este enlace permite saltear el mapa entero. */}
+      <a
+        href={`#${afterMapId}`}
+        className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-20 focus:rounded-lg focus:bg-surface focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-primary focus:shadow-overlay"
+      >
+        Saltar el mapa
+      </a>
       <svg
         viewBox={`0 0 ${WIDTH} ${layout.height}`}
         role="group"
@@ -142,8 +194,8 @@ export default function ChoroplethMap({
               key={f.id}
               d={f.d}
               fill={entry?.fill ?? "var(--color-line)"}
-              stroke={selected ? "var(--color-focus)" : "var(--color-surface)"}
-              strokeWidth={selected ? 2.5 : 1}
+              stroke="var(--color-surface)"
+              strokeWidth={1}
               strokeLinejoin="round"
               tabIndex={0}
               role="button"
@@ -157,18 +209,34 @@ export default function ChoroplethMap({
                   onSelect?.(selected ? null : f.id);
                 }
               }}
-              onMouseMove={(e) => handleMove(e, f.id)}
-              onMouseLeave={() => setTooltip(null)}
-              onFocus={() => {
-                const rect = containerRef.current?.getBoundingClientRect();
-                if (!rect) return;
-                const scale = rect.width / WIDTH;
-                setTooltip({ x: f.centroid[0] * scale, y: f.centroid[1] * scale, id: f.id });
+              onMouseEnter={() => showTooltip(f)}
+              onMouseLeave={hideTooltipSoon}
+              onFocus={(e) => {
+                showTooltip(f);
+                if (isFocusVisible(e.currentTarget)) setFocusedId(f.id);
               }}
-              onBlur={() => setTooltip(null)}
+              onBlur={() => {
+                setTooltip(null);
+                setFocusedId(null);
+              }}
             />
           );
         })}
+        {/* Contornos de selección y de foco, encima de todo para que ningún
+            vecino los tape: blanco debajo y color arriba, se ven sobre
+            rellenos claros y oscuros (WCAG 1.4.11 y 2.4.7). */}
+        {outlined.map((f) => (
+          <g key={`outline-${f.id}`} aria-hidden className="pointer-events-none">
+            <path d={f.d} fill="none" stroke="var(--color-surface)" strokeWidth={5} strokeLinejoin="round" />
+            <path
+              d={f.d}
+              fill="none"
+              stroke={f.id === focusedId ? "var(--color-focus)" : "var(--color-ink)"}
+              strokeWidth={2.5}
+              strokeLinejoin="round"
+            />
+          </g>
+        ))}
         {showCodes
           ? layout.features.map((f) => (
               <text
@@ -192,11 +260,16 @@ export default function ChoroplethMap({
             ))
           : null}
       </svg>
+      <span id={afterMapId} tabIndex={-1} className="sr-only">
+        Fin del mapa
+      </span>
       {tooltip && entries[tooltip.id] ? (
         <div
-          className="pointer-events-none absolute z-10 max-w-56 -translate-x-1/2 -translate-y-[calc(100%+10px)] rounded-lg border border-line bg-surface px-3 py-2 text-sm shadow-overlay"
+          className="absolute z-10 max-w-56 -translate-x-1/2 -translate-y-[calc(100%+10px)] rounded-lg border border-line bg-surface px-3 py-2 text-sm shadow-overlay"
           style={{ left: tooltip.x, top: tooltip.y }}
           role="tooltip"
+          onMouseEnter={keepTooltip}
+          onMouseLeave={hideTooltipSoon}
         >
           <p className="font-bold text-ink">{entries[tooltip.id].label}</p>
           {entries[tooltip.id].sublabel ? (

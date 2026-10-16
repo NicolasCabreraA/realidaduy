@@ -123,11 +123,29 @@ export default function ShareButton({
     }
   };
 
+  // Avisos para lectores de pantalla (WCAG 4.1.3): los cambios de texto en los
+  // botones no siempre se anuncian.
+  const status =
+    phase === "working"
+      ? "Generando la imagen…"
+      : phase === "error"
+        ? "No se pudo generar la imagen."
+        : tvPhase === "working"
+          ? "Generando la placa…"
+          : tvPhase === "error"
+            ? "No se pudo generar la placa."
+            : copied
+              ? "Imagen copiada al portapapeles."
+              : "";
+
   const actionClass =
     "pressable w-full rounded-lg px-3 py-2 text-sm font-semibold transition-colors";
 
   return (
     <div ref={wrapRef} data-no-export className="relative inline-block">
+      <p role="status" className="sr-only">
+        {status}
+      </p>
       <button
         ref={triggerRef}
         type="button"
@@ -157,6 +175,7 @@ export default function ShareButton({
           : phase === "error"
             ? "No se pudo"
             : "Imagen"}
+        <span className="sr-only"> para compartir</span>
       </button>
 
       {open ? (

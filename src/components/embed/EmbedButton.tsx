@@ -71,6 +71,9 @@ export default function EmbedButton({
 
   return (
     <div ref={wrapRef} data-no-export className="relative inline-block">
+      <p role="status" className="sr-only">
+        {copied ? "Código copiado al portapapeles." : ""}
+      </p>
       <button
         ref={triggerRef}
         type="button"
@@ -129,7 +132,7 @@ export default function EmbedButton({
               value={snippet}
               rows={4}
               onFocus={(e) => e.currentTarget.select()}
-              className="mt-1 w-full resize-none rounded-lg border border-line bg-canvas p-2 font-mono text-[11px] normal-case tracking-normal text-ink"
+              className="mt-1 w-full resize-none rounded-lg border border-control-line bg-canvas p-2 font-mono text-[11px] normal-case tracking-normal text-ink"
             />
           </label>
 

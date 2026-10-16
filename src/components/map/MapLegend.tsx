@@ -13,7 +13,8 @@ export function SequentialLegend({
   return (
     <div>
       <p className="text-xs font-bold uppercase tracking-wide text-ink-faint">{title}</p>
-      <div className="mt-1 flex" aria-hidden>
+      {/* Contorno: el tono más claro casi no se distingue del fondo blanco. */}
+      <div className="mt-1 flex w-fit rounded-sm outline outline-1 outline-ink/25" aria-hidden>
         {SEQ_COLORS.map((c) => (
           <span key={c} className="h-3 w-10 first:rounded-l-sm last:rounded-r-sm" style={{ background: c }} />
         ))}

@@ -10,6 +10,7 @@ import {
   catalogDatasets,
 } from "@/data/catalogo";
 import { LIMITES_DEPARTAMENTOS_URL, LIMITES_MUNICIPIOS_URL } from "@/data/limites";
+import TableWrap from "@/components/ui/TableWrap";
 
 export const metadata: Metadata = {
   title: "Fuentes y metodología",
@@ -72,8 +73,8 @@ export default function FuentesPage() {
       </nav>
 
       {/* Organismos */}
-      <section aria-labelledby="organismos" className="mt-12 scroll-mt-20" id="organismos">
-        <h2 className="font-display text-2xl font-bold">Organismos fuente</h2>
+      <section aria-labelledby="organismos-titulo" className="mt-12 scroll-mt-20" id="organismos">
+        <h2 id="organismos-titulo" className="font-display text-2xl font-bold">Organismos fuente</h2>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           {sources.map((s) => (
             <article
@@ -143,8 +144,8 @@ export default function FuentesPage() {
       </section>
 
       {/* Tipos de dato */}
-      <section aria-labelledby="tipos" className="mt-12 scroll-mt-20" id="tipos">
-        <h2 className="font-display text-2xl font-bold">Tipos de dato</h2>
+      <section aria-labelledby="tipos-titulo" className="mt-12 scroll-mt-20" id="tipos">
+        <h2 id="tipos-titulo" className="font-display text-2xl font-bold">Tipos de dato</h2>
         <p className="mt-1 max-w-2xl text-sm text-ink-soft">
           Cada observación declara qué clase de dato es; la etiqueta aparece junto a la
           cifra en toda la plataforma.
@@ -181,14 +182,14 @@ export default function FuentesPage() {
       </section>
 
       {/* Diccionario */}
-      <section aria-labelledby="diccionario" className="mt-12 scroll-mt-20" id="diccionario">
-        <h2 className="font-display text-2xl font-bold">Diccionario de indicadores</h2>
+      <section aria-labelledby="diccionario-titulo" className="mt-12 scroll-mt-20" id="diccionario">
+        <h2 id="diccionario-titulo" className="font-display text-2xl font-bold">Diccionario de indicadores</h2>
         <p className="mt-1 max-w-2xl text-sm text-ink-soft">
           Los {dictionary.filter((i) => i.status === "active").length} indicadores activos y
           los que están en preparación. Cada uno tiene su página con definición, metodología
           y ranking.
         </p>
-        <div className="tablewrap mt-4">
+        <TableWrap label="Diccionario de indicadores" className="mt-4">
           <table className="tabla min-w-[680px]">
             <caption className="sr-only">Diccionario de indicadores de la plataforma</caption>
             <thead>
@@ -228,12 +229,12 @@ export default function FuentesPage() {
               ))}
             </tbody>
           </table>
-        </div>
+        </TableWrap>
       </section>
 
       {/* Validación */}
-      <section aria-labelledby="validacion" className="mt-12 scroll-mt-20" id="validacion">
-        <h2 className="font-display text-2xl font-bold">
+      <section aria-labelledby="validacion-titulo" className="mt-12 scroll-mt-20" id="validacion">
+        <h2 id="validacion-titulo" className="font-display text-2xl font-bold">
           ¿Cómo se valida un dato antes de publicarse?
         </h2>
         <ol className="mt-5 space-y-0">
@@ -255,8 +256,8 @@ export default function FuentesPage() {
       </section>
 
       {/* Límites territoriales */}
-      <section aria-labelledby="geo" className="mt-12 scroll-mt-20" id="geo">
-        <h2 className="font-display text-2xl font-bold">Límites territoriales</h2>
+      <section aria-labelledby="geo-titulo" className="mt-12 scroll-mt-20" id="geo">
+        <h2 id="geo-titulo" className="font-display text-2xl font-bold">Límites territoriales</h2>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <div className="rounded-2xl border border-line bg-surface p-5 shadow-card">
             <h3 className="font-display text-base font-bold">19 departamentos</h3>
