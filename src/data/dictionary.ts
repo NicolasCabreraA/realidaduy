@@ -218,7 +218,7 @@ export const dictionary: Indicator[] = [
     description:
       "Variación interanual del Índice Medio de Salarios (IMS), a valores nominales.",
     plainDefinition:
-      "Mide cuánto subieron en promedio los salarios respecto al mismo mes del año anterior, sin descontar la inflación. Para saber si el salario 'le ganó' a los precios hay que compararlo con la inflación.",
+      "Mide cuánto subieron en promedio los salarios respecto al mismo mes del año anterior, sin descontar la inflación. Para saber si el salario 'le ganó' a los precios, mirá el salario real.",
     category: "economia",
     unit: "%",
     unitLabel: "variación nominal interanual",
@@ -233,6 +233,32 @@ export const dictionary: Indicator[] = [
     reading: "neutral",
     decimals: 2,
     lastUpdated: "2026-09-07",
+    status: "active",
+  },
+  {
+    id: "salario-real",
+    slug: "salario-real",
+    name: "Salario real",
+    question: "¿El sueldo le gana a la inflación?",
+    description:
+      "Variación interanual del Índice Medio de Salarios Real del INE: los salarios descontada la inflación.",
+    plainDefinition:
+      "Dice si con el sueldo promedio se compra más o menos que hace un año. Si es positivo, los salarios subieron más que los precios; si es negativo, subieron menos. Es un promedio de todos los asalariados formales: un sueldo en particular puede ir distinto.",
+    category: "economia",
+    unit: "%",
+    unitLabel: "variación real interanual",
+    sourceId: "ine",
+    sourceUrl:
+      "https://www.gub.uy/instituto-nacional-estadistica/tematica/ims-indice-medio-salarios",
+    periodicity: "mensual",
+    geographicLevel: ["pais"],
+    availableFrom: "2008",
+    methodology:
+      "Índice Medio de Salarios Real del INE (base julio 2008 = 100): el IMS nominal deflactado por el IPC. Se toma la variación de los últimos 12 meses del cuadro 2 del informe técnico mensual, y se controla que cierre con la cuenta (1 + IMS nominal) / (1 + IPC) − 1 del mismo mes.",
+    isCalculated: false,
+    reading: "higherIsBetter",
+    decimals: 2,
+    lastUpdated: "2026-10-17",
     status: "active",
   },
   {

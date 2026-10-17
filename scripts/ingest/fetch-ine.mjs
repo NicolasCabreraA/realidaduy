@@ -12,18 +12,25 @@
 //   gub.uy/instituto-nacional-estadistica/comunicacion/publicaciones/<serie>-<mes>-<año>
 // y una frase resumen con las cifras. El script parsea esa frase.
 //
+// El salario real no está en esa frase: sale del informe completo del IMS que
+// la página enlaza en www5.ine.gub.uy (cuadro 2, "IPC, IMS Real…"). Antes de
+// escribirlo se controla que sea el mismo informe y que cierre con la cuenta
+// (1 + IMS nominal) / (1 + IPC) − 1.
+//
 // Filosofía (igual que el resto de la ingesta): ante la duda, romper. Si el INE
 // cambia la redacción, el script FALLA en vez de escribir datos incompletos en
 // silencio. Un archivo con menos observaciones que el anterior también aborta.
 
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
+import tls from "node:tls";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const OUT = path.join(ROOT, "src", "data", "observations", "ine-mensual.ts");
 const CACHE = path.join(ROOT, "scripts", "ingest", ".cache", "ine");
+const CERTS = path.join(ROOT, "scripts", "ingest", "certs", "ine-intermedios.pem");
 const BASE =
   "https://www.gub.uy/instituto-nacional-estadistica/comunicacion/publicaciones";
 const TODAY = new Date().toISOString().slice(0, 10);
@@ -39,6 +46,13 @@ const MESES = [
 ];
 // El INE escribe las dos formas en el cuerpo de las páginas.
 const ALIAS_MES = { septiembre: "setiembre" };
+
+// www5.ine.gub.uy (informe completo del IMS) manda un intermedio equivocado: se
+// suma el correcto, como en fetch-ine-anuales.mjs.
+const intermedios = (await readFile(CERTS, "utf8")).match(
+  /-----BEGIN CERTIFICATE-----[\s\S]+?-----END CERTIFICATE-----/g
+);
+tls.setDefaultCACertificates([...tls.getCACertificates("default"), ...intermedios]);
 
 const args = process.argv.slice(2);
 const flag = (name) => args.includes(name);
@@ -78,6 +92,7 @@ const RANGOS = {
   "tasa-empleo": [20, 80],
   "tasa-actividad": [20, 90],
   "indice-medio-salarios": [-20, 200],
+  "salario-real": [-30, 30],
 };
 
 function checkRango(indicatorId, value, url) {
@@ -143,6 +158,34 @@ const SERIES = [
         },
       ];
     },
+    completo: {
+      link: /href="(https:\/\/www5\.ine\.gub\.uy\/[^"]+\.html)"/i,
+      // Cuadro 2, columnas índice, mes, acumulado en el año y últimos 12 meses:
+      // "Indice de precios del consumo 361,20 0,24 3,65 4,55
+      //  Indice Medio de Salarios REAL 147,45 0,07 1,43 1,28"
+      re: /Indice de precios del consumo [\d.,]+ [-−]?[\d.,]+ [-−]?[\d.,]+ ([-−]?[\d.,]+) Indice Medio de Salarios REAL [\d.,]+ ([-−]?[\d.,]+) ([-−]?[\d.,]+) ([-−]?[\d.,]+)/i,
+      build([ipc, mensual, acumulada, interanual], [, , nominal], ctx) {
+        const ipcSerie = ctx.observado("inflacion-interanual");
+        if (ipcSerie !== undefined && Math.abs(ipcSerie - ipc) > 0.005) {
+          throw new Error(
+            `IMS ${ctx.period}: el informe completo trae un IPC de ${ipc}% y el informe del IPC, ${ipcSerie}%. Revisar ${ctx.url}`
+          );
+        }
+        const cuenta = ((1 + nominal / 100) / (1 + ipc / 100) - 1) * 100;
+        if (Math.abs(cuenta - interanual) > 0.05) {
+          throw new Error(
+            `IMS ${ctx.period}: salario real ${interanual}% no cierra con IMS ${nominal}% e IPC ${ipc}% (esperado ~${cuenta.toFixed(2)}%) en ${ctx.url}`
+          );
+        }
+        return [
+          {
+            indicatorId: "salario-real",
+            value: interanual,
+            notes: `Variación real interanual: el IMS nominal (${ctx.fmt(nominal)}%) descontada la inflación (${ctx.fmt(ipc)}%). Mensual: ${ctx.fmt(mensual)}%; acumulada en el año: ${ctx.fmt(acumulada)}%. Informe técnico del INE publicado el ${ctx.publicado}, cuadro 2.`,
+          },
+        ];
+      },
+    },
   },
 ];
 
@@ -206,6 +249,30 @@ async function getHtml(url, revalidar) {
   return html;
 }
 
+/** Texto normalizado del informe completo. Se guarda solo el texto: el HTML
+ * trae los gráficos embebidos y pesa casi 5 MB por mes. */
+async function getTextoCompleto(url, revalidar) {
+  const file = path.join(CACHE, "completo-" + decodeURIComponent(url.split("/").pop()).replace(/[^\w.-]+/g, "-") + ".txt");
+  if (!FRESH && !revalidar && existsSync(file)) return readFile(file, "utf8");
+
+  let res;
+  try {
+    res = await pedir(url);
+  } catch (e) {
+    const code = e.cause?.code ?? "";
+    if (/CERT|SIGNATURE|ISSUER/.test(code)) {
+      throw new Error(
+        `TLS (${code}) en ${url}: el INE cambió de certificado. Revisar scripts/ingest/certs/ine-intermedios.pem`
+      );
+    }
+    throw e;
+  }
+  if (!res.ok) throw new Error(`HTTP ${res.status} en ${url}`);
+  const texto = normalize(await res.text());
+  await writeFile(file, texto);
+  return texto;
+}
+
 function mesesEntre(desde, hasta) {
   const out = [];
   const [y0, m0] = desde.split("-").map(Number);
@@ -254,15 +321,42 @@ for (const serie of SERIES) {
 
     const fecha = /informes tecnicos (\d{2}\/\d{2}\/\d{4})/i.exec(texto);
     const publicado = fecha ? fecha[1] : "fecha no informada";
-    const ctx = { period, periodLabel, url, publicado, fmt };
+    const ctx = {
+      period, periodLabel, url, publicado, fmt,
+      observado: (indicatorId) => porClave.get(`${indicatorId}|${period}`)?.value,
+    };
+    const nuevas = serie.build(valores, ctx);
 
-    for (const o of serie.build(valores, ctx)) {
+    if (serie.completo) {
+      const link = serie.completo.link.exec(html);
+      if (!link) throw new Error(`${serie.key} ${period}: la página no enlaza el informe completo. Revisar ${url}`);
+      const urlCompleto = new URL(link[1]).href;
+      const completo = await getTextoCompleto(urlCompleto, idx >= revalidarDesde);
+      // Mismo informe: su frase resumen tiene que repetir la variación interanual de la página.
+      const resumen = serie.re.exec(completo);
+      if (!resumen || num(resumen[3], "interanual", urlCompleto) !== valores[2]) {
+        throw new Error(`${serie.key} ${period}: el informe completo no coincide con la página. Revisar ${urlCompleto}`);
+      }
+      const mc = serie.completo.re.exec(completo);
+      if (!mc) {
+        throw new Error(
+          `No se pudo parsear el informe completo de ${serie.key} ${period}: el INE cambió el cuadro. Revisar ${urlCompleto}`
+        );
+      }
+      const valoresCompleto = mc.slice(1).map((raw, i) => num(raw, `cuadro, campo ${i + 1}`, urlCompleto));
+      const ctxCompleto = { ...ctx, url: urlCompleto };
+      for (const o of serie.completo.build(valoresCompleto, valores, ctxCompleto)) {
+        nuevas.push({ ...o, sourceUrl: urlCompleto });
+      }
+    }
+
+    for (const o of nuevas) {
       checkRango(o.indicatorId, o.value, url);
       const clave = `${o.indicatorId}|${period}`;
       const previa = porClave.get(clave);
       if (previa && previa.value !== o.value) {
         throw new Error(
-          `${clave}: dos informes con valores distintos (${previa.value} en ${previa.sourceUrl}, ${o.value} en ${url})`
+          `${clave}: dos informes con valores distintos (${previa.value} en ${previa.sourceUrl}, ${o.value} en ${o.sourceUrl ?? url})`
         );
       }
       porClave.set(clave, {
@@ -272,7 +366,7 @@ for (const serie of SERIES) {
         periodLabel,
         status: "OFFICIAL",
         demo: false,
-        sourceUrl: url,
+        sourceUrl: o.sourceUrl ?? url,
         retrievedAt: TODAY,
       });
     }
@@ -322,6 +416,8 @@ const file = `import type { Observation } from "@/lib/types";
 // Última ejecución: ${TODAY}. Fuente: informes técnicos del INE (IPC, ECH e IMS),
 // una publicación por mes en gub.uy. El script valida el rango de cada valor y
 // que el desempleo cierre con las tasas de actividad y empleo antes de escribir.
+// El salario real sale del informe completo del IMS (cuadro 2) y se controla
+// contra la cuenta con el IMS nominal y el IPC del mismo mes.
 ${porIndicador}
 
 export const ineMensualObservations: Observation[] = [
