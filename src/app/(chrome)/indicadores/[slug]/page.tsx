@@ -7,6 +7,7 @@ import {
   getDepartmentRanking,
   getHistorySeries,
   getLatest,
+  getSeries,
   periodKind,
 } from "@/lib/data";
 import { getObservationSource, getSource } from "@/data/sources";
@@ -84,6 +85,17 @@ export default async function IndicadorPage({
     historySegments.length === 1
       ? `${historySegments[0].name} · ${historySegments[0].from}–${historySegments[0].to}`
       : historySegments.map((s) => `${s.name} ${s.from}–${s.to}`).join(" y ");
+  // Sin serie anual (salarios, salario real, empleo, actividad), la evolución
+  // se muestra con la serie mensual oficial: nunca se mezclan granularidades.
+  const monthly =
+    history.length >= 4
+      ? []
+      : getSeries(indicator.id, "UY", { periodLength: 7 }).filter((o) => o.status !== "SECONDARY");
+  const monthlyFirst = monthly[0];
+  const monthlyLast = monthly[monthly.length - 1];
+  // "Agosto 2026" → "ago 2026": el eje tiene lugar para pocas letras.
+  const monthShort = (o: (typeof monthly)[number]) =>
+    `${o.periodLabel.slice(0, 3).toLowerCase()} ${o.period.slice(0, 4)}`;
   const ranking = indicator.geographicLevel.includes("departamento")
     ? getDepartmentRanking(indicator.id)
     : [];
@@ -222,6 +234,26 @@ export default async function IndicadorPage({
           >
             <LineChart
               data={history.map((o) => ({ x: o.period, y: o.value! }))}
+              unit={indicator.unit}
+              decimals={indicator.decimals}
+            />
+          </ChartCard>
+        ) : monthly.length >= 4 ? (
+          <ChartCard
+            question={`${indicator.question} — evolución`}
+            subtitle="Serie mensual oficial"
+            sourceLine={`Fuente: ${source?.shortName} · ${monthlyFirst.periodLabel}–${monthlyLast.periodLabel} · Serie mensual`}
+            table={{
+              caption: `Evolución mensual de ${indicator.name}`,
+              head: ["Mes", indicator.name],
+              rows: monthly.map((o) => [
+                o.periodLabel,
+                formatValue(o.value!, indicator.unit, indicator.decimals),
+              ]),
+            }}
+          >
+            <LineChart
+              data={monthly.map((o) => ({ x: monthShort(o), y: o.value! }))}
               unit={indicator.unit}
               decimals={indicator.decimals}
             />
