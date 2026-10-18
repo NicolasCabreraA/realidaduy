@@ -6,8 +6,9 @@
 # sus informes técnicos), la esperanza de vida y el desempleo por departamento
 # del INE, series del Banco Mundial, el PBI anual que publica
 # PRISMA (ANII), el PIB trimestral y la cotización del dólar del BCU, tasas de
-# seguridad (M. Interior) y resultados electorales (Corte Electoral; con asserts
-# contra el escrutinio).
+# seguridad (M. Interior), resultados electorales (Corte Electoral; con asserts
+# contra el escrutinio), matrícula por carrera y departamento (anuario del MEC) y
+# de dónde vienen y dónde cursan los estudiantes de la UdelaR (FormA).
 # Lo que no tiene script (pobreza, salario mínimo, datos departamentales) lo
 # revisa la tarea local de Claude (día 5).
 
@@ -83,6 +84,17 @@ jobs:
       - name: Ingesta elecciones (Corte Electoral, con verificación de totales)
         run: node scripts/ingest/fetch-elecciones.mjs
 
+      # Educación terciaria: el anuario del MEC y el FormA de la UdelaR salen una
+      # vez por año. Si alguno cambió de URL o de formato, el paso queda en rojo y
+      # la corrida sigue con el archivo anterior.
+      - name: Ingesta MEC (matrícula por carrera y departamento)
+        continue-on-error: true
+        run: node scripts/ingest/fetch-mec-educacion.mjs
+
+      - name: Ingesta UdelaR (FormA, origen y destino de los estudiantes)
+        continue-on-error: true
+        run: node scripts/ingest/fetch-udelar-forma.mjs
+
       - name: Validar datos
         run: npm run validate:data
 
@@ -93,11 +105,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add src/data/observations/ine-mensual.ts src/data/observations/ine-anuales.ts src/data/observations/series-banco-mundial.ts src/data/observations/prisma.ts src/data/observations/bcu-pib.ts src/data/observations/bcu-cotizaciones.ts src/data/observations/seguridad.ts src/data/elecciones-generadas.ts
+          git add src/data/observations/ine-mensual.ts src/data/observations/ine-anuales.ts src/data/observations/series-banco-mundial.ts src/data/observations/prisma.ts src/data/observations/bcu-pib.ts src/data/observations/bcu-cotizaciones.ts src/data/observations/seguridad.ts src/data/elecciones-generadas.ts src/data/carreras-mec.ts src/data/observations/mec-educacion.ts src/data/udelar-forma.ts src/data/observations/udelar-forma.ts
           if git diff --cached --quiet; then
             echo "Sin cambios de datos este mes."
           else
-            git commit -m "data: actualización automática mensual (INE, Banco Mundial, PRISMA, BCU, seguridad, elecciones)"
+            git commit -m "data: actualización automática mensual (INE, Banco Mundial, PRISMA, BCU, seguridad, elecciones, educación)"
             # La tarea local de Claude también puede pushear el día 5. En el runner
             # quedan archivos versionados modificados que no se commitean (los
             # lista git status); --autostash los aparta para que git acepte rebasar.

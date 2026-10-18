@@ -1,7 +1,15 @@
 // API de acceso a datos. Toda la UI consume estas funciones; cuando la capa de
 // datos migre de archivos estáticos a una base real (V2+), solo cambia este módulo.
 
-import type { Indicator, Observation, Territory } from "@/lib/types";
+import type {
+  CareerEnrollment,
+  CareerWork,
+  Indicator,
+  Observation,
+  StudentFlow,
+  StudentOrigin,
+  Territory,
+} from "@/lib/types";
 import { dictionary, getIndicator } from "@/data/dictionary";
 import { nationalObservations } from "@/data/observations/nacional";
 import { departmentObservations } from "@/data/observations/departamentos";
@@ -17,6 +25,15 @@ import { prismaObservations } from "@/data/observations/prisma";
 import { bcuPibObservations } from "@/data/observations/bcu-pib";
 import { bcuCotizacionesObservations } from "@/data/observations/bcu-cotizaciones";
 import { ineAnualesObservations } from "@/data/observations/ine-anuales";
+import { mecEducacionObservations } from "@/data/observations/mec-educacion";
+import { udelarFormaObservations } from "@/data/observations/udelar-forma";
+import { carrerasMec } from "@/data/carreras-mec";
+import {
+  flujosUdelar,
+  formaUdelarFuente,
+  origenesUdelar,
+  trabajoCarrerasUdelar,
+} from "@/data/udelar-forma";
 import { departments, getTerritoryById } from "@/data/territories";
 
 export { dictionary, getIndicator };
@@ -39,6 +56,8 @@ const allObservations: Observation[] = [
   ...bcuPibObservations,
   ...bcuCotizacionesObservations,
   ...ineAnualesObservations,
+  ...mecEducacionObservations,
+  ...udelarFormaObservations,
 ];
 
 /** Todas las observaciones de la plataforma (usado por las descargas CSV). */
@@ -210,3 +229,39 @@ export function hasData(indicatorId: string, territoryId: string): boolean {
 }
 
 export { getTerritoryById };
+
+// ── Educación terciaria ─────────────────────────────────────────
+
+export { formaUdelarFuente };
+
+/**
+ * Carreras con matrícula en un departamento, de mayor a menor (anuario del MEC).
+ * No incluye las dictadas entre dos departamentos.
+ */
+export function getCareers(territoryId: string): CareerEnrollment[] {
+  return carrerasMec
+    .filter((c) => c.territoryIds.length === 1 && c.territoryIds[0] === territoryId)
+    .sort((a, b) => b.matricula - a.matricula);
+}
+
+/** Dónde cursan los estudiantes de la UdelaR que vivían en el departamento (FormA). */
+export function getStudentOrigin(territoryId: string): StudentOrigin | undefined {
+  return origenesUdelar.find((o) => o.territoryId === territoryId);
+}
+
+/** Flujos de estudiantes de la UdelaR que llegan a un departamento o salen de él. */
+export function getStudentFlows(
+  territoryId: string,
+  direction: "llegan" | "salen"
+): StudentFlow[] {
+  return flujosUdelar
+    .filter((f) => (direction === "llegan" ? f.destinationId : f.originId) === territoryId)
+    .sort((a, b) => b.personas - a.personas);
+}
+
+/** Vínculo con el trabajo de los estudiantes de cada carrera de la UdelaR en el departamento. */
+export function getCareerWork(territoryId: string): CareerWork[] {
+  return trabajoCarrerasUdelar
+    .filter((c) => c.territoryId === territoryId)
+    .sort((a, b) => b.inscripciones - a.inscripciones);
+}

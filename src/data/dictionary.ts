@@ -551,6 +551,124 @@ export const dictionary: Indicator[] = [
     lastUpdated: "2026-08-27",
     status: "active",
   },
+  // ── Educación terciaria ────────────────────────────────────
+  {
+    id: "matricula-universidad-publica",
+    slug: "matricula-universidad-publica",
+    name: "Matrícula en universidades públicas",
+    shortName: "Matrícula universitaria",
+    question: "¿Cuántos estudiantes tienen la UdelaR y la UTEC en cada departamento?",
+    description:
+      "Inscripciones activas a carreras de grado de la UdelaR y la UTEC, según el departamento donde se dicta la carrera.",
+    plainDefinition:
+      "Cuenta los estudiantes activos de cada carrera de grado de la UdelaR y la UTEC en el departamento donde se dicta. Una persona inscripta en dos carreras cuenta dos veces.",
+    category: "sociedad",
+    subCategory: "educacion",
+    unit: "inscripciones",
+    unitLabel: "inscripciones activas a carreras de grado",
+    sourceId: "mec",
+    sourceUrl:
+      "https://www.gub.uy/ministerio-educacion-cultura/datos-y-estadisticas/datos/anuario-estadistico-educacion-2024",
+    periodicity: "anual",
+    geographicLevel: ["pais", "departamento"],
+    availableFrom: "2024",
+    methodology:
+      "Suma de la matrícula por carrera del cuadro II-7.2.1 del Anuario Estadístico de Educación del MEC (UdelaR: estudiante activo por carrera, resolución N.° 15 del CDC de 2012; UTEC: estudiantes matriculados). La suma de cada departamento se controla contra el cuadro II-7.1.1. Se agregan los casos que el cuadro informa solo en su nota: en 2024, 142 de Licenciatura en Obstetricia en Paysandú y 77 de Tecnólogo Cárnico, que el cuadro II-7.1.1 ubica en Tacuarembó. Las carreras dictadas entre dos departamentos cuentan en el total país y en ningún departamento. No incluye universidades privadas ni formación en educación.",
+    formula: "Σ matrícula de las carreras de UdelaR y UTEC dictadas en el departamento",
+    isCalculated: true,
+    reading: "neutral",
+    decimals: 0,
+    lastUpdated: "2026-10-18",
+    status: "active",
+  },
+  {
+    id: "udelar-retencion",
+    slug: "udelar-retencion",
+    name: "Estudiantes de la UdelaR que cursan en su departamento",
+    shortName: "Retención UdelaR",
+    question: "¿Cuántos estudiantes de la UdelaR estudian en su propio departamento?",
+    description:
+      "Porcentaje de las personas que vivían en el departamento el año antes de ingresar a la UdelaR que cursan al menos una carrera en ese departamento.",
+    plainDefinition:
+      "De cada 100 estudiantes de la UdelaR que vivían en el departamento antes de entrar a la universidad, cuántos estudian ahí mismo, aunque además cursen en otro lado.",
+    category: "sociedad",
+    subCategory: "educacion",
+    unit: "%",
+    unitLabel: "por ciento de los estudiantes de la UdelaR que vivían en el departamento",
+    sourceId: "udelar",
+    sourceUrl:
+      "https://planeamiento.udelar.edu.uy/portal/acceso-a-microdatos/microdatos-forma-estudiantes-de-grado/",
+    periodicity: "anual",
+    geographicLevel: ["departamento"],
+    availableFrom: "2025",
+    methodology:
+      "Microdatos del FormA-Estudiantes 2025 de la Dirección General de Planeamiento de la UdelaR, el formulario que completan cada año los estudiantes de grado. Origen: departamento donde la persona vivía en marzo del año anterior a ingresar a la UdelaR (pregunta SD.3.1). Destino: departamento donde se dicta cada carrera, ciclo inicial o CIO en el que está inscripta. Se cuentan personas, no inscripciones. Cubre a quienes completaron el FormA 2025 (135.416 personas), no al total de estudiantes activos. Cita: FormA-Estudiantes 2025, Dirección General de Planeamiento - Udelar.",
+    formula: "personas del departamento que cursan en él ÷ personas del departamento × 100",
+    isCalculated: true,
+    reading: "neutral",
+    decimals: 1,
+    lastUpdated: "2026-10-18",
+    status: "active",
+  },
+  {
+    id: "udelar-captacion",
+    slug: "udelar-captacion",
+    name: "Estudiantes de la UdelaR que llegan de otro departamento",
+    shortName: "Captación UdelaR",
+    question: "¿Cuántos de los que estudian en la UdelaR en el departamento vienen de afuera?",
+    description:
+      "Porcentaje de las personas que cursan en la UdelaR en el departamento que vivían en otro departamento o en otro país el año antes de ingresar.",
+    plainDefinition:
+      "De cada 100 estudiantes de la UdelaR que cursan en el departamento, cuántos vinieron de otro lado. Mide cuánto atrae el departamento como polo universitario.",
+    category: "sociedad",
+    subCategory: "educacion",
+    unit: "%",
+    unitLabel: "por ciento de los estudiantes de la UdelaR que cursan en el departamento",
+    sourceId: "udelar",
+    sourceUrl:
+      "https://planeamiento.udelar.edu.uy/portal/acceso-a-microdatos/microdatos-forma-estudiantes-de-grado/",
+    periodicity: "anual",
+    geographicLevel: ["departamento"],
+    availableFrom: "2025",
+    methodology:
+      "Microdatos del FormA-Estudiantes 2025 de la Dirección General de Planeamiento de la UdelaR. Se cuentan las personas que cursan al menos una carrera, ciclo inicial o CIO en el departamento y, de ellas, las que vivían en otro departamento o en otro país en marzo del año anterior a ingresar (pregunta SD.3.1). Solo se calcula donde cursan al menos 100 personas. Cita: FormA-Estudiantes 2025, Dirección General de Planeamiento - Udelar.",
+    formula:
+      "personas que cursan en el departamento y vivían en otro lugar ÷ personas que cursan en el departamento × 100",
+    isCalculated: true,
+    reading: "neutral",
+    decimals: 1,
+    lastUpdated: "2026-10-18",
+    status: "active",
+  },
+  {
+    id: "udelar-solo-montevideo",
+    slug: "udelar-solo-montevideo",
+    name: "Estudiantes de la UdelaR que cursan solo en Montevideo",
+    shortName: "Solo en Montevideo",
+    question: "¿Cuántos estudiantes de la UdelaR del departamento estudian solo en Montevideo?",
+    description:
+      "Porcentaje de las personas que vivían en el departamento el año antes de ingresar a la UdelaR que cursan todas sus carreras en Montevideo.",
+    plainDefinition:
+      "De cada 100 estudiantes de la UdelaR que vivían en el departamento antes de entrar a la universidad, cuántos estudian únicamente en Montevideo.",
+    category: "sociedad",
+    subCategory: "educacion",
+    unit: "%",
+    unitLabel: "por ciento de los estudiantes de la UdelaR que vivían en el departamento",
+    sourceId: "udelar",
+    sourceUrl:
+      "https://planeamiento.udelar.edu.uy/portal/acceso-a-microdatos/microdatos-forma-estudiantes-de-grado/",
+    periodicity: "anual",
+    geographicLevel: ["departamento"],
+    availableFrom: "2025",
+    methodology:
+      "Microdatos del FormA-Estudiantes 2025 de la Dirección General de Planeamiento de la UdelaR. Origen: departamento donde la persona vivía en marzo del año anterior a ingresar a la UdelaR (pregunta SD.3.1). Se cuentan las personas cuyas carreras, ciclos iniciales y CIO se dictan todos en Montevideo. No aplica a Montevideo. Cita: FormA-Estudiantes 2025, Dirección General de Planeamiento - Udelar.",
+    formula: "personas del departamento que cursan solo en Montevideo ÷ personas del departamento × 100",
+    isCalculated: true,
+    reading: "neutral",
+    decimals: 1,
+    lastUpdated: "2026-10-18",
+    status: "active",
+  },
   // ── Seguridad ──────────────────────────────────────────────
   {
     id: "homicidios-100k",

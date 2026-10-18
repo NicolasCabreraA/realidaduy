@@ -61,6 +61,24 @@ export const sources: Source[] = [
       "Ingreso medio de los hogares y pobreza por departamento (elaboraciones sobre la ECH del INE).",
   },
   {
+    id: "mec",
+    name: "Ministerio de Educación y Cultura",
+    shortName: "MEC",
+    url: "https://www.gub.uy/ministerio-educacion-cultura/",
+    type: "official",
+    provides:
+      "Anuario Estadístico de Educación: ingresos, matrícula y egresos por carrera, institución y departamento.",
+  },
+  {
+    id: "udelar",
+    name: "Universidad de la República — Dirección General de Planeamiento",
+    shortName: "UdelaR (DGPlan)",
+    url: "https://planeamiento.udelar.edu.uy/",
+    type: "official",
+    provides:
+      "Microdatos del FormA-Estudiantes: dónde vivían los estudiantes de grado antes de ingresar, dónde cursan y si trabajan. Uso libre citando la fuente.",
+  },
+  {
     id: "prisma",
     name: "PRISMA — Portal de indicadores de ciencia, tecnología e innovación (ANII)",
     shortName: "PRISMA (ANII)",
