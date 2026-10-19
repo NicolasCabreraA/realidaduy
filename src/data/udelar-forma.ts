@@ -1,14 +1,14 @@
 import type { CareerWork, StudentFlow, StudentOrigin } from "@/lib/types";
 
 // GENERADO por scripts/ingest/fetch-udelar-forma.mjs — no editar a mano.
-// Última ejecución: 2026-10-18. Fuente: FormA-Estudiantes 2025, Dirección General de Planeamiento - Udelar (microdatos anónimos de
+// Última ejecución: 2026-10-19. Fuente: FormA-Estudiantes 2025, Dirección General de Planeamiento - Udelar (microdatos anónimos de
 // 206.960 inscripciones a carrera de 135.416 personas).
 
 export const formaUdelarFuente = {
   cita: "FormA-Estudiantes 2025, Dirección General de Planeamiento - Udelar",
   edicion: "2025",
   sourceUrl: "https://planeamiento.udelar.edu.uy/portal/acceso-a-microdatos/microdatos-forma-estudiantes-de-grado/",
-  retrievedAt: "2026-10-18",
+  retrievedAt: "2026-10-19",
 };
 
 /** Personas por departamento de origen y de cursada; "EXT" = vivía en otro país. */

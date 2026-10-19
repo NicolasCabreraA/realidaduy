@@ -17,12 +17,14 @@
 //    fila tiene que sumar sus carreras; cada departamento, sus centros; y el
 //    total, Montevideo más el resto del país.
 //
-// Carreras sin desagregar: la nota (*) del cuadro II-7.2.1 avisa que el total
-// de UdelaR incluye casos sin sexo que no figuran en ninguna fila de carrera
-// (en 2024: 142 de Licenciatura en Obstetricia en Paysandú y 77 de Tecnólogo
-// Cárnico). Se agregan como filas propias, con su departamento tomado de la
-// nota o, si la nota no lo dice, del único departamento donde el cuadro
-// II-7.1.1 supera a la suma de carreras exactamente en esos casos.
+// Carreras sin desagregar: la nota (*) de los cuadros II-7.2.1 y II-7.1.1
+// avisa que el total de UdelaR incluye casos sin sexo que no figuran en ninguna
+// fila de carrera (en 2024: 142 de Licenciatura en Obstetricia en Paysandú y 77
+// de Tecnólogo Cárnico en Tacuarembó). Se agregan como filas propias, con el
+// departamento que dice la nota; el control cruzado con II-7.1.1 confirma que
+// con ellos cada departamento cierra.
+//
+// Formación en educación privada (cuadro II-6.2.2) también queda afuera.
 //
 // Las universidades privadas (cuadros II-7.2.2 y II-7.2.3) quedan afuera por
 // ahora: varias facultades no traen fila de departamento y algunas carreras
@@ -283,22 +285,28 @@ for (const c of carreras721) {
   const k = `${c.institution}|${c.territoryIds.join("+")}`;
   sumaCarreras.set(k, sumar(sumaCarreras.get(k) ?? [0, 0, 0], c.v));
 }
-// Casos de la nota: el departamento sale de la propia nota o de la diferencia con II-7.1.1.
+// Casos de la nota: los dos cuadros traen la misma nota (*); el departamento de
+// cada caso sale de la que lo nombra entre paréntesis. Después, el control
+// cruzado de abajo confirma que con esos casos cada departamento cierra.
+const nota711 = ordenadas(h711)
+  .map((k) => String(h711.get(k).A ?? ""))
+  .find((t) => /^\*\s*En UdelaR/i.test(t.trim()));
+const casos711 = [...(nota711 ?? "").matchAll(/-\s*([^:\r\n]+?):\s*(\d+)\s*casos/g)].map((m) => ({
+  nombre: m[1].trim(),
+  casos: Number(m[2]),
+}));
+const sinParentesis = (s) => s.replace(/\s*\([^)]*\)\s*$/, "");
+const clave = (c) => `${norm(sinParentesis(c.nombre))}|${c.casos}`;
+if (sinDesagregar.map(clave).sort().join() !== casos711.map(clave).sort().join())
+  fail("las notas (*) de los cuadros II-7.2.1 y II-7.1.1 no informan los mismos casos sin desagregar");
 const filasNota = [];
 for (const caso of sinDesagregar) {
-  const enNota = caso.nombre.match(/\(([^)]+)\)\s*$/);
-  let ids = enNota ? departamentos(enNota[1]) : null;
-  if (!ids) {
-    const candidatos = [...cuadro711.entries()].filter(([k, v]) => {
-      if (!k.startsWith("UdelaR|")) return false;
-      const s = sumaCarreras.get(k) ?? [0, 0, 0];
-      return v[1] - s[1] === caso.casos && v[0] === s[0] && v[2] === s[2];
-    });
-    if (candidatos.length !== 1)
-      fail(`no se puede ubicar el departamento de "${caso.nombre}" (${caso.casos} casos sin desagregar)`);
-    ids = candidatos[0][0].split("|")[1].split("+");
-  }
-  filasNota.push({ ...caso, ids, career: caso.nombre.replace(/\s*\([^)]*\)\s*$/, "") });
+  const otro = casos711.find((c) => clave(c) === clave(caso));
+  const nombreConDepto = [caso.nombre, otro.nombre].find((n) => /\(([^)]+)\)\s*$/.test(n));
+  const ids = nombreConDepto ? departamentos(nombreConDepto.match(/\(([^)]+)\)\s*$/)[1]) : null;
+  if (!ids) fail(`ninguna nota dice en qué departamento están los ${caso.casos} casos de "${caso.nombre}"`);
+  const cuadroNota = nombreConDepto === caso.nombre ? "II-7.2.1" : "II-7.1.1";
+  filasNota.push({ ...caso, ids, career: sinParentesis(caso.nombre), cuadroNota });
   const k = `UdelaR|${ids.join("+")}`;
   sumaCarreras.set(k, sumar(sumaCarreras.get(k) ?? [0, 0, 0], [0, caso.casos, 0]));
 }
@@ -382,27 +390,43 @@ const centros621 = []; // { depto, centro, por carrera }
 // ── Filas de salida ─────────────────────────────────────────────────────────
 const CUADRO_721 = `MEC, Anuario Estadístico de Educación ${ANIO}, cuadro II-7.2.1.`;
 const CUADRO_621 = `MEC, Anuario Estadístico de Educación ${ANIO}, cuadro II-6.2.1.`;
+const unEspacio = (s) => s.replace(/\s+/g, " ").trim();
+// Notas de II-6.2.1 que se copian tal cual en cada fila: la definición de
+// matrícula y qué incluye cada categoría de carrera.
+const notas621 = ordenadas(h621)
+  .filter((k) => k > filaSubN)
+  .map((k) => unEspacio(String(h621.get(k).A ?? "")))
+  .filter((t) => /^(Matrícula considerada|La categoría )/.test(t));
+if (!notas621.some((t) => t.startsWith("Matrícula considerada")))
+  fail("II-6.2.1: falta la nota que define la matrícula");
 const filas = [];
 for (const c of carreras721) {
   const [ingresos, matricula, egresos] = c.v;
   if (ingresos === 0 && matricula === 0 && egresos === 0) continue;
   const avisos = [CUADRO_721];
   if (c.territoryIds.length > 1) avisos.push("Carrera dictada entre dos departamentos.");
-  // La matrícula incluye por definición a la generación de ingreso.
+  if (c.institution === "UdelaR") avisos.push("Egresos preliminares, según el anuario.");
+  // En UdelaR la matrícula incluye por definición a la generación de ingreso
+  // (resolución N.° 15 del CDC). De UTEC el anuario no da la definición.
   if (ingresos > matricula)
-    avisos.push("En el anuario los ingresos superan a la matrícula, que por definición los incluye: dato a confirmar con el MEC.");
-  filas.push({ institution: c.institution, unit: c.unit, career: c.career, territoryIds: c.territoryIds, ingresos, matricula, egresos, notes: avisos.join(" ") });
+    avisos.push(
+      c.institution === "UdelaR"
+        ? "En el anuario los ingresos superan a la matrícula, que por definición los incluye: dato a confirmar con el MEC."
+        : "En el anuario los ingresos superan a la matrícula: dato a confirmar con el MEC."
+    );
+  filas.push({ institution: c.institution, unit: unEspacio(c.unit), career: unEspacio(c.career), territoryIds: c.territoryIds, ingresos, matricula, egresos, notes: avisos.join(" ") });
 }
 for (const n of filasNota)
   filas.push({
-    institution: "UdelaR", unit: null, career: n.career, territoryIds: n.ids, ingresos: null, matricula: n.casos, egresos: null,
-    notes: `${CUADRO_721} La carrera no tiene fila propia en el cuadro: sus ${n.casos} estudiantes figuran solo en la nota (*) del total de UdelaR, sin sexo, ingresos ni egresos.`,
+    institution: "UdelaR", unit: null, career: unEspacio(n.career), territoryIds: n.ids, ingresos: null, matricula: n.casos, egresos: null,
+    notes: `${CUADRO_721} Estos ${n.casos} estudiantes no están en las filas de carrera del cuadro: figuran solo en su nota (*), sin sexo, ingresos ni egresos. El departamento sale de la nota del cuadro ${n.cuadroNota}.`,
   });
 for (const c of centros621)
   carreras621.forEach((car, i) => {
     const [ingresos, matricula, egresos] = c.porCarrera[i];
     if (ingresos === 0 && matricula === 0 && egresos === 0) return;
-    filas.push({ institution: "Formación en Educación (ANEP)", unit: c.centro, career: car.nombre, territoryIds: [c.depto], ingresos, matricula, egresos, notes: CUADRO_621 });
+    const definiciones = notas621.filter((t) => t.startsWith("Matrícula considerada") || norm(t).startsWith(`la categoria ${norm(car.nombre)} `));
+    filas.push({ institution: "Formación en Educación (ANEP)", unit: unEspacio(c.centro), career: car.nombre, territoryIds: [c.depto], ingresos, matricula, egresos, notes: [CUADRO_621, ...definiciones].join(" ") });
   });
 
 // Matrícula en universidades públicas por departamento (solo carreras de un departamento).

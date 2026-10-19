@@ -273,12 +273,14 @@ for (const d of deptos) {
   const enSuDepto = o.solo + o.yOtro;
   push(
     "udelar-retencion", d, pct(enSuDepto, o.personas),
-    `De ${fmt(o.personas)} personas que vivían en ${NOMBRE[d]} el año antes de ingresar a la UdelaR, ${fmt(enSuDepto)} cursan en ${NOMBRE[d]} (${fmt(o.solo)} solo ahí y ${fmt(o.yOtro)} también en otro departamento).`
+    enSuDepto === 0
+      ? `De ${fmt(o.personas)} personas que vivían en ${NOMBRE[d]} el año antes de ingresar a la UdelaR, ninguna cursa en ${NOMBRE[d]}.`
+      : `De ${fmt(o.personas)} personas que vivían en ${NOMBRE[d]} el año antes de ingresar a la UdelaR, ${fmt(enSuDepto)} cursan en ${NOMBRE[d]} (${fmt(o.solo)} solo ahí y ${fmt(o.yOtro)} también en otro departamento).`
   );
   push(
     "udelar-captacion", d, c.conOrigen >= MIN_CAPTACION ? pct(c.deAfuera, c.conOrigen) : null,
     c.conOrigen >= MIN_CAPTACION
-      ? `De ${fmt(c.conOrigen)} personas que cursan en ${NOMBRE[d]}, ${fmt(c.deAfuera)} vivían en otro departamento o en otro país el año antes de ingresar.`
+      ? `De ${fmt(c.conOrigen)} personas que cursan en la UdelaR en ${NOMBRE[d]}, ${fmt(c.deAfuera)} vivían en otro departamento o en otro país el año antes de ingresar.`
       : c.conOrigen === 0
         ? `Ninguna persona declara cursar en la UdelaR en ${NOMBRE[d]}.`
         : `Menos de ${MIN_CAPTACION} personas cursan en la UdelaR en ${NOMBRE[d]} (${fmt(c.conOrigen)}): no se calcula el porcentaje.`

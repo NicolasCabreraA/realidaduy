@@ -557,15 +557,15 @@ export const dictionary: Indicator[] = [
     slug: "matricula-universidad-publica",
     name: "Matrícula en universidades públicas",
     shortName: "Matrícula universitaria",
-    question: "¿Cuántos estudiantes tienen la UdelaR y la UTEC en cada departamento?",
+    question: "¿Cuánta matrícula tienen la UdelaR y la UTEC en cada departamento?",
     description:
-      "Inscripciones activas a carreras de grado de la UdelaR y la UTEC, según el departamento donde se dicta la carrera.",
+      "Matrícula de las carreras de grado de la UdelaR y la UTEC, según el departamento donde se dicta la carrera.",
     plainDefinition:
-      "Cuenta los estudiantes activos de cada carrera de grado de la UdelaR y la UTEC en el departamento donde se dicta. Una persona inscripta en dos carreras cuenta dos veces.",
+      "Suma la matrícula de cada carrera de grado de la UdelaR y la UTEC en el departamento donde se dicta. Se cuenta por carrera: una persona inscripta en dos carreras cuenta dos veces.",
     category: "sociedad",
     subCategory: "educacion",
     unit: "inscripciones",
-    unitLabel: "inscripciones activas a carreras de grado",
+    unitLabel: "inscripciones a carreras de grado",
     sourceId: "mec",
     sourceUrl:
       "https://www.gub.uy/ministerio-educacion-cultura/datos-y-estadisticas/datos/anuario-estadistico-educacion-2024",
@@ -573,7 +573,7 @@ export const dictionary: Indicator[] = [
     geographicLevel: ["pais", "departamento"],
     availableFrom: "2024",
     methodology:
-      "Suma de la matrícula por carrera del cuadro II-7.2.1 del Anuario Estadístico de Educación del MEC (UdelaR: estudiante activo por carrera, resolución N.° 15 del CDC de 2012; UTEC: estudiantes matriculados). La suma de cada departamento se controla contra el cuadro II-7.1.1. Se agregan los casos que el cuadro informa solo en su nota: en 2024, 142 de Licenciatura en Obstetricia en Paysandú y 77 de Tecnólogo Cárnico, que el cuadro II-7.1.1 ubica en Tacuarembó. Las carreras dictadas entre dos departamentos cuentan en el total país y en ningún departamento. No incluye universidades privadas ni formación en educación.",
+      "Suma de la matrícula por carrera del cuadro II-7.2.1 del Anuario Estadístico de Educación del MEC. En la UdelaR la matrícula es el estudiante activo por carrera (resolución N.° 15 del CDC del 23/10/2012): quien rindió algún curso o examen en los dos años anteriores, más la generación de ingreso. El dato de UTEC es de su Programa de Evaluación y Estadística. La suma de cada departamento se controla contra el cuadro II-7.1.1. Se agregan los casos que el anuario informa solo en la nota de los cuadros: en 2024, 142 de Licenciatura en Obstetricia en Paysandú y 77 de Tecnólogo Cárnico en Tacuarembó. Las carreras dictadas entre dos departamentos cuentan en el total país y en ningún departamento. No incluye universidades privadas, institutos universitarios ni formación en educación.",
     formula: "Σ matrícula de las carreras de UdelaR y UTEC dictadas en el departamento",
     isCalculated: true,
     reading: "neutral",
@@ -590,7 +590,7 @@ export const dictionary: Indicator[] = [
     description:
       "Porcentaje de las personas que vivían en el departamento el año antes de ingresar a la UdelaR que cursan al menos una carrera en ese departamento.",
     plainDefinition:
-      "De cada 100 estudiantes de la UdelaR que vivían en el departamento antes de entrar a la universidad, cuántos estudian ahí mismo, aunque además cursen en otro lado.",
+      "De cada 100 estudiantes de la UdelaR que vivían en el departamento el año antes de entrar a la universidad, cuántos cursan ahí mismo, aunque además cursen en otro lado.",
     category: "sociedad",
     subCategory: "educacion",
     unit: "%",
@@ -613,13 +613,13 @@ export const dictionary: Indicator[] = [
   {
     id: "udelar-captacion",
     slug: "udelar-captacion",
-    name: "Estudiantes de la UdelaR que llegan de otro departamento",
+    name: "Estudiantes de la UdelaR que llegan de afuera del departamento",
     shortName: "Captación UdelaR",
     question: "¿Cuántos de los que estudian en la UdelaR en el departamento vienen de afuera?",
     description:
       "Porcentaje de las personas que cursan en la UdelaR en el departamento que vivían en otro departamento o en otro país el año antes de ingresar.",
     plainDefinition:
-      "De cada 100 estudiantes de la UdelaR que cursan en el departamento, cuántos vinieron de otro lado. Mide cuánto atrae el departamento como polo universitario.",
+      "De cada 100 estudiantes de la UdelaR que cursan en el departamento, cuántos vivían en otro departamento o en el exterior el año antes de entrar. Mide cuánto atrae el departamento como polo universitario.",
     category: "sociedad",
     subCategory: "educacion",
     unit: "%",
@@ -649,7 +649,7 @@ export const dictionary: Indicator[] = [
     description:
       "Porcentaje de las personas que vivían en el departamento el año antes de ingresar a la UdelaR que cursan todas sus carreras en Montevideo.",
     plainDefinition:
-      "De cada 100 estudiantes de la UdelaR que vivían en el departamento antes de entrar a la universidad, cuántos estudian únicamente en Montevideo.",
+      "De cada 100 estudiantes de la UdelaR que vivían en el departamento el año antes de entrar a la universidad, cuántos cursan únicamente en Montevideo.",
     category: "sociedad",
     subCategory: "educacion",
     unit: "%",

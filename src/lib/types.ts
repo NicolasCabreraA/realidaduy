@@ -212,7 +212,7 @@ export interface CareerWork {
   territoryId: string;
   period: string;
   inscripciones: number;
-  /** % que trabaja, sobre quienes respondieron la pregunta. */
+  /** % con trabajo remunerado, sobre quienes respondieron la pregunta. */
   trabajan: number;
   /** % con trabajo muy o bastante relacionado con la carrera, sobre quienes trabajan y respondieron. */
   relacionada: number | null;
