@@ -34,6 +34,7 @@ import {
   origenesUdelar,
   trabajoCarrerasUdelar,
 } from "@/data/udelar-forma";
+import { mediaMecFuente, sextoMec, utuMediaMec, utuTerciariaMec } from "@/data/media-mec";
 import { departments, getTerritoryById } from "@/data/territories";
 
 export { dictionary, getIndicator };
@@ -232,7 +233,24 @@ export { getTerritoryById };
 
 // ── Educación terciaria ─────────────────────────────────────────
 
-export { formaUdelarFuente };
+export { formaUdelarFuente, mediaMecFuente };
+
+/** Estudiantes de 6º de liceo por opción en el departamento (anuario del MEC). */
+export function getSixthGrade(territoryId: string) {
+  return sextoMec.filter((s) => s.territoryId === territoryId);
+}
+
+/** Estudiantes de UTU en media superior por tipo de curso, de mayor a menor. */
+export function getTechnicalCourses(territoryId: string) {
+  return utuMediaMec
+    .filter((u) => u.territoryId === territoryId)
+    .sort((a, b) => b.publica + b.privada - (a.publica + a.privada));
+}
+
+/** Matrícula de UTU en cursos terciarios no universitarios en el departamento. */
+export function getTechnicalTertiary(territoryId: string): number | undefined {
+  return utuTerciariaMec[territoryId];
+}
 
 /**
  * Carreras con matrícula en un departamento, de mayor a menor (anuario del MEC).

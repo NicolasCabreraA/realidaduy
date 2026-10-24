@@ -105,7 +105,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add src/data/observations/ine-mensual.ts src/data/observations/ine-anuales.ts src/data/observations/series-banco-mundial.ts src/data/observations/prisma.ts src/data/observations/bcu-pib.ts src/data/observations/bcu-cotizaciones.ts src/data/observations/seguridad.ts src/data/elecciones-generadas.ts src/data/carreras-mec.ts src/data/observations/mec-educacion.ts src/data/udelar-forma.ts src/data/observations/udelar-forma.ts
+          git add src/data/observations/ine-mensual.ts src/data/observations/ine-anuales.ts src/data/observations/series-banco-mundial.ts src/data/observations/prisma.ts src/data/observations/bcu-pib.ts src/data/observations/bcu-cotizaciones.ts src/data/observations/seguridad.ts src/data/elecciones-generadas.ts src/data/carreras-mec.ts src/data/media-mec.ts src/data/observations/mec-educacion.ts src/data/udelar-forma.ts src/data/observations/udelar-forma.ts
           if git diff --cached --quiet; then
             echo "Sin cambios de datos este mes."
           else

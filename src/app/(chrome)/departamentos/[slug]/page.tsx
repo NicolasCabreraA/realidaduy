@@ -17,6 +17,7 @@ import StateView from "@/components/ui/StateView";
 import { SITE_NAME } from "@/lib/site";
 import TableWrap from "@/components/ui/TableWrap";
 import EducacionTerciaria from "@/components/educacion/EducacionTerciaria";
+import MediaSuperior from "@/components/educacion/MediaSuperior";
 
 export function generateStaticParams() {
   return departments.map((d) => ({ slug: d.slug }));
@@ -321,6 +322,7 @@ export default async function DepartmentProfile({
         )}
       </section>
 
+      <MediaSuperior dept={dept} />
       <EducacionTerciaria dept={dept} />
 
       {/* Fuente */}

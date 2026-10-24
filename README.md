@@ -29,7 +29,7 @@ npm run build          # build de producción (41 páginas estáticas)
 npm run start          # servir el build
 npm run fetch:geo      # ingesta de geometrías (IDE + cartografía censal INE)
 npm run fetch:mensual  # ingesta mensual: INE, Banco Mundial, PRISMA, BCU (PIB y cotizaciones), seguridad, elecciones y educación
-npm run fetch:mec      # matrícula por carrera y departamento (Anuario Estadístico de Educación del MEC)
+npm run fetch:mec      # matrícula por carrera, 6º de liceo y UTU por departamento (Anuario Estadístico de Educación del MEC)
 npm run fetch:udelar   # de dónde vienen y dónde cursan los estudiantes de la UdelaR (microdatos FormA)
 npm run validate:data  # validación de datos (integridad, sumas, outliers)
 ```

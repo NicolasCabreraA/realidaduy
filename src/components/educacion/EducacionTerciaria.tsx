@@ -7,6 +7,7 @@ import {
   getCareerWork,
   getStudentFlows,
   getStudentOrigin,
+  getTechnicalTertiary,
 } from "@/lib/data";
 import { formatNumber } from "@/lib/format";
 import RankingList from "@/components/charts/RankingList";
@@ -156,6 +157,7 @@ export default function EducacionTerciaria({ dept }: { dept: Territory }) {
   const anuarioUrl = carreras[0]?.sourceUrl;
   const hayCio = filas.some((c) => c.career.startsWith("CIO "));
 
+  const utuTerciaria = getTechnicalTertiary(dept.id);
   const trabajo = getCareerWork(dept.id);
   const llegan = getStudentFlows(dept.id, "llegan");
   const totalLlegan = llegan.reduce((s, f) => s + f.personas, 0);
@@ -222,6 +224,13 @@ export default function EducacionTerciaria({ dept }: { dept: Territory }) {
             El anuario del MEC no registra carreras públicas que se dicten solo en {dept.name}.
           </p>
         )}
+        {utuTerciaria !== undefined && utuTerciaria > 0 ? (
+          <p className="mt-3 border-t border-line pt-3 text-sm text-ink-soft">
+            Aparte, UTU (DGETP) tenía una matrícula de{" "}
+            <strong className="tnum text-ink">{formatNumber(utuTerciaria)}</strong> en cursos terciarios no
+            universitarios en {dept.name}. El anuario no la desagrega por carrera (cuadro II-5.1.1).
+          </p>
+        ) : null}
       </div>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">

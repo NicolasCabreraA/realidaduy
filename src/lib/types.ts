@@ -170,6 +170,29 @@ export interface CareerEnrollment {
   notes?: string;
 }
 
+/** Estudiantes de 6º de liceo de un departamento en una opción (anuario del MEC). */
+export interface SixthGradeChoice {
+  territoryId: string;
+  period: string;
+  /** "Reformulación 2006" o "Plan 94" (los dos planes de 6º en la educación pública). */
+  plan: string;
+  option: string;
+  /** Cómo la escribe el anuario, cuando es una abreviatura ("3º DER"). */
+  abbreviation?: string;
+  publica: number;
+  /** Privados: el anuario da las opciones de la Reformulación 2006 para todos los planes; null en Plan 94. */
+  privada: number | null;
+}
+
+/** Estudiantes de UTU (DGETP) en media superior de un departamento, por tipo de curso. */
+export interface TechnicalCourse {
+  territoryId: string;
+  period: string;
+  course: string;
+  publica: number;
+  privada: number;
+}
+
 /**
  * Personas que estudian en la UdelaR según dónde vivían el año antes de
  * ingresar (origen) y en qué departamento cursan (destino). Quien cursa en dos

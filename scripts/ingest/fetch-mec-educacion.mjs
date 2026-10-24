@@ -24,16 +24,22 @@
 // departamento que dice la nota; el control cruzado con II-7.1.1 confirma que
 // con ellos cada departamento cierra.
 //
+// 4. Educación media superior, para ver qué eligen antes de la universidad:
+//    II-4.2.8 y II-4.2.9, 6º de liceo por opción (pública por plan; privada,
+//    todos los planes); II-4.2.2, UTU media superior por tipo de curso; y
+//    II-5.1.1, UTU terciaria no universitaria por departamento. El anuario da
+//    las áreas de UTU (informática, administración…) solo para todo el país.
+//
 // Formación en educación privada (cuadro II-6.2.2) también queda afuera.
 //
 // Las universidades privadas (cuadros II-7.2.2 y II-7.2.3) quedan afuera por
 // ahora: varias facultades no traen fila de departamento y algunas carreras
 // no traen total.
 //
-// Genera src/data/carreras-mec.ts (filas por carrera) y
+// Genera src/data/carreras-mec.ts (filas por carrera),
 // src/data/observations/mec-educacion.ts (matrícula en universidades públicas
-// por departamento). Cuando salga un anuario nuevo, cambian las constantes de
-// abajo.
+// por departamento) y src/data/media-mec.ts (6º de liceo y UTU). Cuando salga
+// un anuario nuevo, cambian las constantes de abajo.
 // Uso: node scripts/ingest/fetch-mec-educacion.mjs
 
 import { access, mkdir, readFile, writeFile } from "node:fs/promises";
@@ -45,6 +51,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", ".
 const CACHE = path.join(ROOT, "scripts", "ingest", ".cache");
 const OUT_CARRERAS = path.join(ROOT, "src", "data", "carreras-mec.ts");
 const OUT_OBS = path.join(ROOT, "src", "data", "observations", "mec-educacion.ts");
+const OUT_MEDIA = path.join(ROOT, "src", "data", "media-mec.ts");
 const TODAY = new Date().toISOString().slice(0, 10);
 
 const ANIO = "2024";
@@ -461,6 +468,163 @@ console.log(
 );
 for (const id of ["UY-MO", "UY-PA", "UY-SA", "UY-MA"]) console.log(`  ${NOMBRE[id]}: ${fmt(porDepto[id])}`);
 
+// ── 4. Educación media superior: 6º de liceo y UTU (II-4.2.8, II-4.2.9, II-4.2.2) ──
+// Los cuadros de media traen las filas TOTAL, MONTEVIDEO (que es también el
+// departamento), RESTO DEL PAÍS y los otros 18 departamentos.
+/** Filas por departamento de un cuadro de media: { total, resto, deptos: { "UY-PA": fila } }. */
+function filasMedia(h, nombre) {
+  const out = { total: null, resto: null, deptos: {} };
+  for (const k of ordenadas(h)) {
+    const a = norm(h.get(k).A);
+    if (a === "total") out.total ??= h.get(k);
+    else if (a === "resto del pais") out.resto = h.get(k);
+    else if (DEPTO[a]) {
+      if (out.deptos[DEPTO[a]]) fail(`${nombre}: ${NOMBRE[DEPTO[a]]} aparece dos veces`);
+      out.deptos[DEPTO[a]] = h.get(k);
+    }
+  }
+  if (!out.total || !out.resto || Object.keys(out.deptos).length !== 19)
+    fail(`${nombre}: no están el total, el resto del país y los 19 departamentos`);
+  return out;
+}
+/** Controla que, columna por columna, los 18 departamentos del interior sumen el resto y con Montevideo el total. */
+function cierraMedia(f, cols, nombre) {
+  for (const c of cols) {
+    const interior = Object.entries(f.deptos)
+      .filter(([id]) => id !== "UY-MO")
+      .reduce((s, [, r]) => s + numero(r[c], `${nombre} ${c}`), 0);
+    if (interior !== numero(f.resto[c], nombre)) fail(`${nombre}: la columna ${c} del interior no da el resto del país`);
+    if (interior + numero(f.deptos["UY-MO"][c], nombre) !== numero(f.total[c], nombre))
+      fail(`${nombre}: la columna ${c} no da el total`);
+  }
+}
+/** Controla los encabezados esperados en una fila: { columna: texto }. */
+function encabezados(h, fila, esperados, nombre) {
+  for (const [col, texto] of Object.entries(esperados))
+    if (norm(h.get(fila)?.[col]) !== norm(texto)) fail(`${nombre}: en ${col}${fila} esperaba "${texto}" y dice "${h.get(fila)?.[col]}"`);
+}
+const tituloDe = (h) => Object.values(h.get(5) ?? {}).join(" ");
+
+// 6º público por plan y opción. Las abreviaturas del Plan 94 son las seis
+// opciones de 6º de ese plan (Derecho, Economía, Agronomía, Medicina,
+// Arquitectura e Ingeniería; ver https://iava.edu.uy/noct_detalles.htm).
+const h428 = hoja("II-4.2.8");
+if (!/SEXTO GRADO DE EDUCACI[ÓO]N MEDIA GENERAL P[ÚU]BLICA POR PLAN Y OPCI[ÓO]N/i.test(tituloDe(h428)) || !tituloDe(h428).includes(ANIO))
+  fail(`II-4.2.8 no es el cuadro de 6º público por opción ${ANIO}`);
+const PLAN94 = { D: ["3º DER", "Derecho"], E: ["3º ECO", "Economía"], F: ["3º AGR", "Agronomía"], G: ["3º MED", "Medicina"], H: ["3º ARQ", "Arquitectura"], I: ["3º ING", "Ingeniería"] };
+const OPCIONES06 = ["Social Humanístico", "Social Economía", "Ciencias Agrarias", "Ciencias Biológicas", "Física Matemática", "Matemática Diseño", "Arte y Expresión"];
+const COLS06_PUB = ["K", "L", "M", "N", "O", "P", "Q"];
+encabezados(h428, 7, { B: "TOTAL GENERAL", C: "TOTAL Plan 94", J: "Total Plan Ref. 06" }, "II-4.2.8");
+encabezados(h428, 9, Object.fromEntries(Object.entries(PLAN94).map(([c, [abrev]]) => [c, abrev])), "II-4.2.8");
+encabezados(h428, 9, Object.fromEntries(COLS06_PUB.map((c, i) => [c, OPCIONES06[i]])), "II-4.2.8");
+const f428 = filasMedia(h428, "II-4.2.8");
+cierraMedia(f428, ["B", "C", ...Object.keys(PLAN94), "J", ...COLS06_PUB], "II-4.2.8");
+
+// 6º privado por opción (el anuario lo da para todos los planes juntos).
+const h429 = hoja("II-4.2.9");
+if (!/SEXTO GRADO DE EDUCACI[ÓO]N MEDIA GENERAL PRIVADA POR OPCI[ÓO]N/i.test(tituloDe(h429)) || !tituloDe(h429).includes(ANIO))
+  fail(`II-4.2.9 no es el cuadro de 6º privado por opción ${ANIO}`);
+const COLS06_PRIV = ["C", "D", "E", "F", "G", "H", "I"];
+encabezados(h429, 6, { B: "TOTAL" }, "II-4.2.9");
+encabezados(h429, 7, Object.fromEntries(COLS06_PRIV.map((c, i) => [c, OPCIONES06[i]])), "II-4.2.9");
+const f429 = filasMedia(h429, "II-4.2.9");
+cierraMedia(f429, ["B", ...COLS06_PRIV], "II-4.2.9");
+
+const sexto = [];
+for (const id of Object.keys(NOMBRE)) {
+  const pub = f428.deptos[id];
+  const priv = f429.deptos[id];
+  const v = (r, c) => numero(r[c], `${NOMBRE[id]} ${c}`);
+  const p94 = Object.keys(PLAN94).reduce((s, c) => s + v(pub, c), 0);
+  const p06 = COLS06_PUB.reduce((s, c) => s + v(pub, c), 0);
+  if (p94 !== v(pub, "C") || p06 !== v(pub, "J") || p94 + p06 !== v(pub, "B"))
+    fail(`II-4.2.8: las opciones de ${NOMBRE[id]} no suman sus totales`);
+  if (COLS06_PRIV.reduce((s, c) => s + v(priv, c), 0) !== v(priv, "B")) fail(`II-4.2.9: las opciones de ${NOMBRE[id]} no suman su total`);
+  OPCIONES06.forEach((opcion, i) =>
+    sexto.push({ territoryId: id, plan: "Reformulación 2006", option: opcion, publica: v(pub, COLS06_PUB[i]), privada: v(priv, COLS06_PRIV[i]) })
+  );
+  for (const [c, [abrev, opcion]] of Object.entries(PLAN94))
+    sexto.push({ territoryId: id, plan: "Plan 94", option: opcion, abbreviation: abrev, publica: v(pub, c), privada: null });
+}
+
+// UTU (DGETP), media superior tecnológica por tipo de curso. Cada tipo trae
+// una columna de total y, a su derecha, varones y mujeres.
+const h422 = hoja("II-4.2.2");
+if (!/DGETP EN EDUCACI[ÓO]N MEDIA SUPERIOR TECNOL[ÓO]GICA POR FORMA DE ADMINISTRACI[ÓO]N, TIPO DE CURSO/i.test(tituloDe(h422)) || !tituloDe(h422).includes(ANIO))
+  fail(`II-4.2.2 no es el cuadro de UTU media superior por departamento ${ANIO}`);
+const CURSOS = {
+  "bachillerato figari": "Bachillerato Figari",
+  "bachillerato profesional": "Bachillerato Profesional",
+  "bachillerato tecnico profesional": "Bachillerato Técnico Profesional",
+  "bachillerato tecnologico": "Bachillerato Tecnológico",
+  "educacion media profesional": "Educación Media Profesional",
+  "educacion media tecnologica": "Educación Media Tecnológica",
+  "educacion media tecnologica finest": "Educación Media Tecnológica FINEST",
+  "e.m.p. don bosco": "E.M.P. Don Bosco",
+};
+const colN = (c) => c.split("").reduce((s, ch) => s * 26 + ch.charCodeAt(0) - 64, 0);
+const colL = (n) => (n > 26 ? colL(Math.floor((n - 1) / 26)) : "") + String.fromCharCode(65 + ((n - 1) % 26));
+encabezados(h422, 6, { B: "TOTAL", E: "TOTAL PÚBLICA", AC: "TOTAL PRIVADA" }, "II-4.2.2");
+const tipos422 = Object.entries(h422.get(8) ?? {})
+  .filter(([, t]) => norm(t) !== "sexo")
+  .map(([col, t]) => {
+    const nombre = CURSOS[norm(t)];
+    if (!nombre) fail(`II-4.2.2: tipo de curso desconocido "${t}"`);
+    const total = colL(colN(col) - 1);
+    if (norm(h422.get(10)?.[total]) !== "total") fail(`II-4.2.2: el total de ${nombre} no está en ${total}`);
+    return { nombre, col, total, privada: colN(col) > colN("AC") };
+  });
+const pubs = tipos422.filter((t) => !t.privada);
+const privs = tipos422.filter((t) => t.privada);
+if (pubs.length !== 7 || privs.length !== 4) fail(`II-4.2.2: esperaba 7 tipos públicos y 4 privados, hay ${pubs.length} y ${privs.length}`);
+const f422 = filasMedia(h422, "II-4.2.2");
+cierraMedia(f422, ["B", "E", "AC", ...tipos422.map((t) => t.total)], "II-4.2.2");
+const utuMedia = [];
+for (const id of Object.keys(NOMBRE)) {
+  const r = f422.deptos[id];
+  const v = (c) => numero(r[c], `II-4.2.2 ${NOMBRE[id]} ${c}`);
+  for (const t of tipos422) {
+    const sig = colL(colN(t.col) + 1);
+    if (v(t.total) !== v(t.col) + v(sig)) fail(`II-4.2.2: en ${NOMBRE[id]}, ${t.nombre} no suma varones y mujeres`);
+  }
+  if (pubs.reduce((s, t) => s + v(t.total), 0) !== v("E")) fail(`II-4.2.2: los cursos públicos de ${NOMBRE[id]} no dan su total`);
+  if (privs.reduce((s, t) => s + v(t.total), 0) !== v("AC")) fail(`II-4.2.2: los cursos privados de ${NOMBRE[id]} no dan su total`);
+  if (v("E") + v("AC") !== v("B")) fail(`II-4.2.2: pública más privada no da el total de ${NOMBRE[id]}`);
+  for (const nombre of new Set(tipos422.map((t) => t.nombre))) {
+    const pub = pubs.find((t) => t.nombre === nombre);
+    const priv = privs.find((t) => t.nombre === nombre);
+    const fila = { territoryId: id, course: nombre, publica: pub ? v(pub.total) : 0, privada: priv ? v(priv.total) : 0 };
+    if (fila.publica + fila.privada > 0) utuMedia.push(fila);
+  }
+}
+
+// UTU (DGETP), ofertas terciarias no universitarias por departamento (II-5.1.1).
+const h511 = hoja("II-5.1.1");
+if (!/MATR[ÍI]CULA Y PERSONAL DOCENTE POR SEXO SEG[ÚU]N GRANDES [ÁA]REAS, DEPARTAMENTOS E INSTITUCIONES/i.test(tituloDe(h511)) || !tituloDe(h511).includes(ANIO))
+  fail(`II-5.1.1 no es el cuadro de terciaria no universitaria ${ANIO}`);
+encabezados(h511, 6, { B: "TOTAL MATRÍCULA" }, "II-5.1.1");
+const filas511 = ordenadas(h511).map((k) => ({ k, a: norm(h511.get(k).A), r: h511.get(k) }));
+const iResto = filas511.findIndex((f) => f.a === "resto del pais");
+const iMvd = filas511.findIndex((f) => f.a === "montevideo");
+const dgetpMvd = filas511.slice(iMvd + 1, iResto).filter((f) => f.a === "dgetp");
+if (iMvd < 0 || iResto < iMvd || dgetpMvd.length !== 1) fail("II-5.1.1: no se ubica la fila DGETP de Montevideo");
+const iDgetp = filas511.findIndex((f, i) => i > iResto && f.a === "dgetp");
+if (iDgetp < 0) fail("II-5.1.1: no se ubica la fila DGETP del interior");
+const utuTerciaria = { "UY-MO": numero(dgetpMvd[0].r.B, "II-5.1.1 DGETP Montevideo") };
+for (const f of filas511.slice(iDgetp + 1)) {
+  const id = DEPTO[f.a];
+  if (!id) break; // termina la lista de DGETP (sigue otra institución)
+  if (utuTerciaria[id] !== undefined) fail(`II-5.1.1: ${NOMBRE[id]} aparece dos veces en DGETP`);
+  utuTerciaria[id] = numero(f.r.B, `II-5.1.1 ${NOMBRE[id]}`);
+}
+if (Object.keys(utuTerciaria).length !== 19) fail(`II-5.1.1: DGETP tiene ${Object.keys(utuTerciaria).length} departamentos`);
+const interior511 = Object.entries(utuTerciaria).filter(([id]) => id !== "UY-MO").reduce((s, [, n]) => s + n, 0);
+if (interior511 !== numero(filas511[iDgetp].r.B, "II-5.1.1 DGETP interior")) fail("II-5.1.1: los departamentos no dan la fila DGETP del interior");
+
+console.log(
+  `II-4.2.8/9: 6º en ${NOMBRE["UY-PA"]} ${fmt(sexto.filter((s) => s.territoryId === "UY-PA").reduce((s, x) => s + x.publica + (x.privada ?? 0), 0))}; II-4.2.2: UTU media en ${NOMBRE["UY-PA"]} ${fmt(utuMedia.filter((s) => s.territoryId === "UY-PA").reduce((s, x) => s + x.publica + x.privada, 0))}; II-5.1.1: UTU terciaria en ${NOMBRE["UY-PA"]} ${fmt(utuTerciaria["UY-PA"])}`
+);
+
 // ── Archivos ────────────────────────────────────────────────────────────────
 const lineaCarrera = (f) =>
   `  { institution: ${JSON.stringify(f.institution)}, unit: ${JSON.stringify(f.unit)}, career: ${JSON.stringify(f.career)}, territoryIds: ${JSON.stringify(f.territoryIds)}, period: "${ANIO}", ingresos: ${f.ingresos}, matricula: ${f.matricula}, egresos: ${f.egresos}, sourceUrl: ${JSON.stringify(PAGINA)}, retrievedAt: "${TODAY}", notes: ${JSON.stringify(f.notes)} },`;
@@ -495,5 +659,42 @@ ${observaciones.map(lineaObs).join("\n")}
 ];
 `
 );
+const lineaSexto = (s) =>
+  `  { territoryId: "${s.territoryId}", period: "${ANIO}", plan: ${JSON.stringify(s.plan)}, option: ${JSON.stringify(s.option)},${s.abbreviation ? ` abbreviation: ${JSON.stringify(s.abbreviation)},` : ""} publica: ${s.publica}, privada: ${s.privada} },`;
+const lineaUtu = (u) =>
+  `  { territoryId: "${u.territoryId}", period: "${ANIO}", course: ${JSON.stringify(u.course)}, publica: ${u.publica}, privada: ${u.privada} },`;
+await writeFile(
+  OUT_MEDIA,
+  `import type { SixthGradeChoice, TechnicalCourse } from "@/lib/types";
+
+// GENERADO por scripts/ingest/fetch-mec-educacion.mjs — no editar a mano.
+// Última ejecución: ${TODAY}. Fuente: MEC, Anuario Estadístico de Educación ${ANIO}.
+// Cada cuadro se controla por sus totales (opciones contra totales de plan,
+// departamentos contra resto del país y total): si algo no cierra, no escribe.
+
+export const mediaMecFuente = {
+  cita: "MEC, Anuario Estadístico de Educación ${ANIO}",
+  periodo: "${ANIO}",
+  sourceUrl: ${JSON.stringify(PAGINA)},
+  retrievedAt: "${TODAY}",
+};
+
+/** Estudiantes de 6º de liceo por opción (cuadros II-4.2.8, pública, y II-4.2.9, privada). */
+export const sextoMec: SixthGradeChoice[] = [
+${sexto.map(lineaSexto).join("\n")}
+];
+
+/** UTU (DGETP), educación media superior tecnológica por tipo de curso (cuadro II-4.2.2). */
+export const utuMediaMec: TechnicalCourse[] = [
+${utuMedia.map(lineaUtu).join("\n")}
+];
+
+/** UTU (DGETP), matrícula en ofertas terciarias no universitarias por departamento (cuadro II-5.1.1). */
+export const utuTerciariaMec: Record<string, number> = ${JSON.stringify(
+    Object.fromEntries(Object.keys(NOMBRE).map((id) => [id, utuTerciaria[id]]))
+  ).replace(/,/g, ", ")};
+`
+);
 console.log(`→ ${path.relative(ROOT, OUT_CARRERAS)}: ${filas.length} filas`);
 console.log(`→ ${path.relative(ROOT, OUT_OBS)}: ${observaciones.length} observaciones`);
+console.log(`→ ${path.relative(ROOT, OUT_MEDIA)}: ${sexto.length} filas de 6º, ${utuMedia.length} de UTU media, ${Object.keys(utuTerciaria).length} de UTU terciaria`);

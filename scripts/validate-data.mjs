@@ -24,6 +24,7 @@ const { mecEducacionObservations } = await import("../src/data/observations/mec-
 const { udelarFormaObservations } = await import("../src/data/observations/udelar-forma.ts");
 const { carrerasMec } = await import("../src/data/carreras-mec.ts");
 const { flujosUdelar, origenesUdelar, trabajoCarrerasUdelar } = await import("../src/data/udelar-forma.ts");
+const { sextoMec, utuMediaMec, utuTerciariaMec } = await import("../src/data/media-mec.ts");
 const { sources } = await import("../src/data/sources.ts");
 const { parties, elections, electionResults, turnout } = await import("../src/data/elections.ts");
 const { catalogDatasets } = await import("../src/data/catalogo.ts");
@@ -243,6 +244,17 @@ for (const [indicatorId, period] of [
     if (!deptIds.has(t.territoryId)) errors.push(`Trabajo por carrera con departamento inexistente: ${t.territoryId}`);
     if (!(t.trabajan >= 0 && t.trabajan <= 100)) errors.push(`Porcentaje inválido en ${t.career} / ${t.territoryId}`);
   }
+  // Media superior: 13 opciones de 6º por departamento, UTU media y terciaria en los 19.
+  for (const id of deptIds) {
+    const sexto = sextoMec.filter((s) => s.territoryId === id);
+    if (sexto.length !== 13) errors.push(`6º de ${id}: ${sexto.length}/13 opciones`);
+    if (utuTerciariaMec[id] === undefined) errors.push(`UTU terciaria sin dato para ${id}`);
+  }
+  for (const s of sextoMec)
+    if (!Number.isInteger(s.publica) || s.publica < 0 || (s.privada !== null && (!Number.isInteger(s.privada) || s.privada < 0)))
+      errors.push(`6º con valor inválido: ${s.territoryId} / ${s.option}`);
+  for (const u of utuMediaMec)
+    if (!deptIds.has(u.territoryId) || u.publica + u.privada <= 0) errors.push(`UTU media inválida: ${u.territoryId} / ${u.course}`);
 }
 
 // Elecciones: referencias válidas y exactamente un ganador por territorio/elección.
