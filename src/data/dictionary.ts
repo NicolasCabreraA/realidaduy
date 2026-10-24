@@ -305,9 +305,9 @@ export const dictionary: Indicator[] = [
     sourceUrl: "https://www.gub.uy/instituto-nacional-estadistica/tematica/pobreza",
     periodicity: "semestral",
     geographicLevel: ["pais", "departamento"],
-    availableFrom: "2006",
+    availableFrom: "2015",
     methodology:
-      "ECH del INE. El dato nacional y la apertura departamental 2024 usan la metodología actualizada (Met. 2017, canasta de la ENGIH 2016-2017; apertura departamental elaborada por el Observatorio Territorio Uruguay de OPP). El dato departamental 2023 usa la metodología anterior (canasta 2006): ambas mediciones NO son comparables entre sí y esta plataforma nunca las mezcla ni calcula variaciones entre ellas.",
+      "ECH del INE. El dato nacional y la apertura departamental 2024 usan la metodología actualizada (Met. 2017, canasta de la ENGIH 2016-2017; apertura departamental elaborada por el Observatorio Territorio Uruguay de OPP). La serie nacional anual desde 2015 es la que el propio INE recalculó hacia atrás con la metodología 2017 (Cuadro 6.5 del documento «Metodología 2017», mayo 2025), así que se compara año a año sin quiebre. El dato departamental 2023 usa la metodología anterior (canasta 2006): ambas mediciones NO son comparables entre sí y esta plataforma nunca las mezcla ni calcula variaciones entre ellas.",
     isCalculated: false,
     reading: "lowerIsBetter",
     decimals: 1,
