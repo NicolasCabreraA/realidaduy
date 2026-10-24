@@ -50,6 +50,38 @@ export const nationalObservations: Observation[] = [
       "Decreto 319/025, artículo 2: ajuste de +3,3% desde el 1º de julio de 2026. Valor nominal (a precios corrientes).",
   },
   // ── Sociedad ───────────────────────────────────────────────
+  // Pobreza anual 2015–2023 con la metodología 2017: el INE recalculó la serie
+  // hacia atrás con la canasta nueva (Cuadro 6.5 del documento «Metodología
+  // 2017»), así que empalma con 2024 y 2025 sin quiebre. Su 2024 (17,3) coincide
+  // con el del informe anual 2025. La serie de la metodología 2006 no se mezcla.
+  ...(
+    [
+      ["2015", 18.1],
+      ["2016", 17.9],
+      ["2017", 15.5],
+      ["2018", 16.4],
+      ["2019", 17.3],
+      ["2020", 23.3],
+      ["2021", 21.1],
+      ["2022", 20.1],
+      ["2023", 19.7],
+    ] as const
+  ).map(
+    ([period, value]): Observation => ({
+      indicatorId: "pobreza-personas",
+      territoryId: "UY",
+      period,
+      periodLabel: `Año ${period}`,
+      value,
+      status: "OFFICIAL",
+      demo: false,
+      sourceUrl:
+        "https://www5.ine.gub.uy/documents/Demograf%C3%ADayEESS/PDF/ECH/Pobreza/Metodolog%C3%ADa%202017%20final%20v140525.pdf",
+      retrievedAt: "2026-10-24",
+      notes:
+        "Metodología 2017 del INE, recalculada hacia atrás por el propio INE: Cuadro 6.5 del documento «Metodología 2017» (mayo 2025), personas bajo la LP 2017, total país.",
+    })
+  ),
   {
     indicatorId: "pobreza-personas",
     territoryId: "UY",
