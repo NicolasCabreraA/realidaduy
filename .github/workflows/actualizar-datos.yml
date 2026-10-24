@@ -67,9 +67,9 @@ jobs:
         continue-on-error: true
         run: node scripts/ingest/fetch-bcu-pib.mjs
 
-      # Dólar: servicio web de cotizaciones del BCU. Mismo criterio: si falla,
-      # queda el archivo anterior y la corrida sigue.
-      - name: Ingesta BCU (cotización del dólar)
+      # Cotizaciones (dólar, real, euro y peso argentino): servicio web del BCU.
+      # Mismo criterio: si falla, queda el archivo anterior y la corrida sigue.
+      - name: Ingesta BCU (cotizaciones)
         continue-on-error: true
         run: node scripts/ingest/fetch-bcu-cotizaciones.mjs
 
