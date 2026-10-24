@@ -16,6 +16,7 @@ import { CONJUNTO_ELECCIONES_2024, CONJUNTO_ELECCIONES_2025 } from "@/data/catal
 import StateView from "@/components/ui/StateView";
 import { SITE_NAME } from "@/lib/site";
 import TableWrap from "@/components/ui/TableWrap";
+import EducacionTerciaria from "@/components/educacion/EducacionTerciaria";
 
 export function generateStaticParams() {
   return departments.map((d) => ({ slug: d.slug }));
@@ -319,6 +320,8 @@ export default async function DepartmentProfile({
           </div>
         )}
       </section>
+
+      <EducacionTerciaria dept={dept} />
 
       {/* Fuente */}
       <section aria-labelledby="fuente" className="mt-10">
