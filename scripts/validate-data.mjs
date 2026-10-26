@@ -23,7 +23,7 @@ const { ineAnualesObservations } = await import("../src/data/observations/ine-an
 const { mecEducacionObservations } = await import("../src/data/observations/mec-educacion.ts");
 const { udelarFormaObservations } = await import("../src/data/observations/udelar-forma.ts");
 const { carrerasMec } = await import("../src/data/carreras-mec.ts");
-const { flujosUdelar, origenesUdelar, trabajoCarrerasUdelar } = await import("../src/data/udelar-forma.ts");
+const { flujosUdelar, origenesUdelar, trabajoCarrerasUdelar, carrerasAfueraUdelar, resumenAfueraUdelar } = await import("../src/data/udelar-forma.ts");
 const { sextoMec, utuMediaMec, utuTerciariaMec } = await import("../src/data/media-mec.ts");
 const { sources } = await import("../src/data/sources.ts");
 const { parties, elections, electionResults, turnout } = await import("../src/data/elections.ts");
@@ -243,6 +243,13 @@ for (const [indicatorId, period] of [
   for (const t of trabajoCarrerasUdelar) {
     if (!deptIds.has(t.territoryId)) errors.push(`Trabajo por carrera con departamento inexistente: ${t.territoryId}`);
     if (!(t.trabajan >= 0 && t.trabajan <= 100)) errors.push(`Porcentaje inválido en ${t.career} / ${t.territoryId}`);
+  }
+  // Carreras cursadas afuera: 19 resúmenes y filas coherentes.
+  if (resumenAfueraUdelar.length !== 19) errors.push(`Resumen de carreras afuera: ${resumenAfueraUdelar.length}/19`);
+  for (const c of carrerasAfueraUdelar) {
+    if (!deptIds.has(c.originId)) errors.push(`Carrera afuera con origen inexistente: ${c.originId}`);
+    if (c.personas < 10 || c.montevideo + c.salto + c.otros < c.personas)
+      errors.push(`Carrera afuera incoherente: ${c.career} / ${c.originId}`);
   }
   // Media superior: 13 opciones de 6º por departamento, UTU media y terciaria en los 19.
   for (const id of deptIds) {

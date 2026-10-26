@@ -46,5 +46,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly" as const,
       priority: 0.8,
     })),
+    ...departments.map((d) => ({
+      url: absoluteUrl(`/departamentos/${d.slug}/educacion`),
+      lastModified: lastUpdated,
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    })),
   ];
 }

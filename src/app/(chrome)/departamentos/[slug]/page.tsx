@@ -16,8 +16,6 @@ import { CONJUNTO_ELECCIONES_2024, CONJUNTO_ELECCIONES_2025 } from "@/data/catal
 import StateView from "@/components/ui/StateView";
 import { SITE_NAME } from "@/lib/site";
 import TableWrap from "@/components/ui/TableWrap";
-import EducacionTerciaria from "@/components/educacion/EducacionTerciaria";
-import MediaSuperior from "@/components/educacion/MediaSuperior";
 
 export function generateStaticParams() {
   return departments.map((d) => ({ slug: d.slug }));
@@ -72,7 +70,9 @@ export default async function DepartmentProfile({
     poblacion?.obs.value && poblacionUY?.obs.value
       ? (poblacion.obs.value / poblacionUY.obs.value) * 100
       : null;
+  // Los indicadores de educación van en su propio panel (/departamentos/[slug]/educacion).
   const deptMetricIds = indicatorsForLevel("departamento")
+    .filter((i) => i.subCategory !== "educacion")
     .map((i) => i.id)
     .filter((id) => id !== "poblacion" && hasData(id, dept.id));
   const toBars = (electionId: string) =>
@@ -322,8 +322,22 @@ export default async function DepartmentProfile({
         )}
       </section>
 
-      <MediaSuperior dept={dept} />
-      <EducacionTerciaria dept={dept} />
+      {/* Educación: panel aparte */}
+      <section aria-labelledby="educacion" className="mt-10">
+        <h2 id="educacion" className="sr-only">
+          Educación
+        </h2>
+        <Link
+          href={`/departamentos/${dept.slug}/educacion`}
+          className="pressable block rounded-2xl border border-line bg-surface p-4 shadow-card transition-colors hover:border-celeste"
+        >
+          <p className="font-display text-lg font-bold text-primary">Educación en {dept.name} →</p>
+          <p className="mt-1 text-sm text-ink-soft">
+            Carreras, de dónde vienen los estudiantes, qué estudian afuera los de {dept.name}, 6º de
+            liceo y UTU.
+          </p>
+        </Link>
+      </section>
 
       {/* Fuente */}
       <section aria-labelledby="fuente" className="mt-10">

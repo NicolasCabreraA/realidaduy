@@ -21,7 +21,7 @@ const pct = (parte: number, total: number) => `${formatNumber((parte / total) * 
 const nombreDepto = (id: string) =>
   id === "EXT" ? "Otro país" : (departments.find((d) => d.id === id)?.name ?? id);
 /** "DOCTOR EN MEDICINA" → "Doctor en medicina" (el FormA trae los nombres en mayúsculas). */
-const oracion = (s: string) => s.charAt(0) + s.slice(1).toLocaleLowerCase("es");
+export const oracion = (s: string) => s.charAt(0) + s.slice(1).toLocaleLowerCase("es");
 
 /** Marcas de las filas que el anuario informa con alguna salvedad. */
 function salvedad(c: CareerEnrollment): string | null {
@@ -48,7 +48,7 @@ function Institucion({ c }: { c: CareerEnrollment }) {
 }
 
 /** Tabla que muestra las primeras filas y pliega el resto en "Ver todas" (sin JS). */
-function TablaPlegable({
+export function TablaPlegable({
   label,
   minWidth,
   head,

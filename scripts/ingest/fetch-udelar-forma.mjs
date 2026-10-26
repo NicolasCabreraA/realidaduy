@@ -190,6 +190,7 @@ if (filas.length - 1 !== INSCRIPCIONES_ESPERADAS)
 
 const personas = new Map(); // id → { origen, destinos: Set }
 const trabajo = new Map(); // "código|UY-XX" → acumulados
+const afuera = new Map(); // "UY-XX (origen)|código" → carrera cursada fuera del departamento
 for (let n = 1; n < filas.length; n++) {
   const f = campos(filas[n]);
   if (f.length !== cabecera.length) fail(`la fila ${n} tiene ${f.length} campos y la cabecera ${cabecera.length}`);
@@ -205,6 +206,16 @@ for (let n = 1; n < filas.length; n++) {
     p.destinos.add(destino);
   }
   if (f[C.tipo] !== "CARRERA" && f[C.tipo] !== "CARRERA_COMPARTIDA") continue; // ciclos iniciales y CIO
+  // Carreras que cursan fuera de su departamento quienes vivían en él.
+  if (origen && origen !== "EXT" && origen !== destino) {
+    const ka = `${origen}|${f[C.codigo]}`;
+    if (!afuera.has(ka)) afuera.set(ka, { origen, codigo: f[C.codigo], carrera: f[C.carrera], personas: new Set(), mvd: 0, salto: 0, otros: 0 });
+    const a = afuera.get(ka);
+    a.personas.add(id);
+    if (destino === "UY-MO") a.mvd++;
+    else if (destino === "UY-SA") a.salto++;
+    else a.otros++;
+  }
   const k = `${f[C.codigo]}|${destino}`;
   if (!trabajo.has(k)) trabajo.set(k, { codigo: f[C.codigo], carrera: f[C.carrera], destino, n: 0, si: 0, resp: 0, rel: 0, relResp: 0 });
   const t = trabajo.get(k);
@@ -302,6 +313,22 @@ for (const d of ["UY-PA", "UY-SA", "UY-MA"]) {
 }
 console.log(`  ${fmt(personas.size)} personas, ${fmt(sinOrigen)} sin dato de origen; ${flujos.size} flujos; ${filasTrabajo.length} carreras por departamento con ≥ ${MIN_TRABAJO} inscripciones`);
 
+// Carreras cursadas afuera: las de al menos MIN_AFUERA personas, y el resto resumido.
+const MIN_AFUERA = 10;
+const filasAfuera = [];
+const resumenAfuera = [];
+for (const d of deptos) {
+  const todas = [...afuera.values()].filter((a) => a.origen === d);
+  const grandes = todas.filter((a) => a.personas.size >= MIN_AFUERA).sort((a, b) => b.personas.size - a.personas.size);
+  const chicas = todas.filter((a) => a.personas.size < MIN_AFUERA);
+  const union = (xs) => new Set(xs.flatMap((a) => [...a.personas])).size;
+  for (const a of grandes)
+    filasAfuera.push({ ...a, personas: a.personas.size, enOrigen: trabajo.get(`${a.codigo}|${d}`)?.n ?? 0 });
+  resumenAfuera.push({ d, personas: union(todas), carreras: todas.length, otrasCarreras: chicas.length, otrasPersonas: union(chicas) });
+}
+const pa = resumenAfuera.find((r) => r.d === "UY-PA");
+console.log(`  Paysandú: ${fmt(pa.personas)} personas cursan afuera en ${pa.carreras} carreras; ${filasAfuera.filter((a) => a.origen === "UY-PA").length} con ≥ ${MIN_AFUERA}`);
+
 const lineaFlujo = ([k, v]) => {
   const [o, d] = k.split("|");
   return `  { originId: "${o}", destinationId: "${d}", period: "${EDICION}", personas: ${v} },`;
@@ -314,7 +341,7 @@ const lineaTrabajo = (t) =>
   `  { careerCode: ${JSON.stringify(t.codigo)}, career: ${JSON.stringify(t.carrera)}, territoryId: "${t.destino}", period: "${EDICION}", inscripciones: ${t.n}, trabajan: ${pct(t.si, t.resp)}, relacionada: ${t.relResp >= 10 ? pct(t.rel, t.relResp) : null} },`;
 await writeFile(
   OUT_DATOS,
-  `import type { CareerWork, StudentFlow, StudentOrigin } from "@/lib/types";
+  `import type { CareerAbroad, CareerAbroadSummary, CareerWork, StudentFlow, StudentOrigin } from "@/lib/types";
 
 // GENERADO por scripts/ingest/fetch-udelar-forma.mjs — no editar a mano.
 // Última ejecución: ${TODAY}. Fuente: ${CITA} (microdatos anónimos de
@@ -339,6 +366,21 @@ ${deptos.map(lineaOrigen).join("\n")}
 /** Carreras (sin ciclos iniciales ni CIO) con al menos ${MIN_TRABAJO} inscripciones en el departamento. */
 export const trabajoCarrerasUdelar: CareerWork[] = [
 ${filasTrabajo.map(lineaTrabajo).join("\n")}
+];
+
+/**
+ * Carreras que cursan fuera de su departamento quienes vivían en él el año antes
+ * de ingresar (al menos ${MIN_AFUERA} personas). montevideo/salto/otros son inscripciones
+ * por departamento donde cursan; enOrigen, inscripciones de esa carrera en el
+ * propio departamento, de cualquier procedencia (0 = no se dicta ahí).
+ */
+export const carrerasAfueraUdelar: CareerAbroad[] = [
+${filasAfuera.map((a) => `  { originId: "${a.origen}", careerCode: ${JSON.stringify(a.codigo)}, career: ${JSON.stringify(a.carrera)}, period: "${EDICION}", personas: ${a.personas}, montevideo: ${a.mvd}, salto: ${a.salto}, otros: ${a.otros}, enOrigen: ${a.enOrigen} },`).join("\n")}
+];
+
+/** Totales de personas que cursan afuera y de las carreras con menos de ${MIN_AFUERA} personas. */
+export const resumenAfueraUdelar: CareerAbroadSummary[] = [
+${resumenAfuera.map((r) => `  { originId: "${r.d}", period: "${EDICION}", personas: ${r.personas}, carreras: ${r.carreras}, otrasCarreras: ${r.otrasCarreras}, otrasPersonas: ${r.otrasPersonas} },`).join("\n")}
 ];
 `
 );

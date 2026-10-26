@@ -170,6 +170,32 @@ export interface CareerEnrollment {
   notes?: string;
 }
 
+/** Carrera de la UdelaR que cursan fuera de su departamento quienes vivían en él (FormA). */
+export interface CareerAbroad {
+  originId: string;
+  careerCode: string;
+  career: string;
+  period: string;
+  /** Personas distintas. */
+  personas: number;
+  /** Inscripciones según dónde cursan (quien cursa en dos departamentos cuenta en los dos). */
+  montevideo: number;
+  salto: number;
+  otros: number;
+  /** Inscripciones de esa carrera en el departamento de origen, de cualquier procedencia; 0 = no se dicta ahí. */
+  enOrigen: number;
+}
+
+export interface CareerAbroadSummary {
+  originId: string;
+  period: string;
+  personas: number;
+  carreras: number;
+  /** Carreras con menos de 10 personas, que no se listan una por una. */
+  otrasCarreras: number;
+  otrasPersonas: number;
+}
+
 /** Estudiantes de 6º de liceo de un departamento en una opción (anuario del MEC). */
 export interface SixthGradeChoice {
   territoryId: string;

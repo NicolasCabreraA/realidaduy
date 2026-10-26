@@ -30,8 +30,10 @@ import { udelarFormaObservations } from "@/data/observations/udelar-forma";
 import { carrerasMec } from "@/data/carreras-mec";
 import {
   flujosUdelar,
+  carrerasAfueraUdelar,
   formaUdelarFuente,
   origenesUdelar,
+  resumenAfueraUdelar,
   trabajoCarrerasUdelar,
 } from "@/data/udelar-forma";
 import { mediaMecFuente, sextoMec, utuMediaMec, utuTerciariaMec } from "@/data/media-mec";
@@ -282,4 +284,12 @@ export function getCareerWork(territoryId: string): CareerWork[] {
   return trabajoCarrerasUdelar
     .filter((c) => c.territoryId === territoryId)
     .sort((a, b) => b.inscripciones - a.inscripciones);
+}
+
+/** Carreras que cursan fuera del departamento quienes vivían en él, de más a menos personas. */
+export function getCareersAbroad(territoryId: string) {
+  return {
+    carreras: carrerasAfueraUdelar.filter((c) => c.originId === territoryId),
+    resumen: resumenAfueraUdelar.find((r) => r.originId === territoryId),
+  };
 }
