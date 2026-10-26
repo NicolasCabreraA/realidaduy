@@ -101,7 +101,9 @@ function TablaCarreras({ filas, total, dept }: { filas: CareerEnrollment[]; tota
         </td>
         <td className="num">{formatNumber(c.matricula)}</td>
         <td className="num">{pct(c.matricula, total)}</td>
-        <td className="num">{c.egresos === null ? "—" : formatNumber(c.egresos)}</td>
+        <td className="num">
+          {c.career.startsWith("CIO ") ? "No aplica" : c.egresos === null ? "—" : formatNumber(c.egresos)}
+        </td>
       </tr>
     );
   };
@@ -210,7 +212,7 @@ export default function EducacionTerciaria({ dept }: { dept: Territory }) {
                 <>
                   {" "}
                   Los CIO (ciclos iniciales optativos) son una puerta de ingreso a la UdelaR desde la que se
-                  sigue en distintas carreras (
+                  sigue en distintas carreras, así que no tienen egresos (
                   <a className={enlace} href={IMPO_CIO} rel="noopener noreferrer" target="_blank">
                     IMPO
                   </a>
